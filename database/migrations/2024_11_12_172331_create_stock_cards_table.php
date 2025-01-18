@@ -1,0 +1,33 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('stock_cards', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('item_id')->constrained()->onDelete('cascade');
+            $table->string('transaction_number');
+            $table->integer('qty_begin');
+            $table->integer('qty_in');
+            $table->integer('qty_out');
+            $table->integer('qty_end');
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('stock_cards');
+    }
+};
