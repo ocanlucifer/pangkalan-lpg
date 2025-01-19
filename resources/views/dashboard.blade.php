@@ -27,7 +27,7 @@
         </ul> --}}
 
         {{-- Slideshow --}}
-        <div id="carouselExampleAutoplaying" class="carousel slide" data-bs-ride="carousel">
+        {{-- <div id="carouselExampleAutoplaying" class="carousel slide" data-bs-ride="carousel">
             <div class="carousel-inner">
                 <div class="carousel-item active">
                     <img src="{{ asset('images/1.jpg') }}" class="d-block w-100 carousel-image" alt="Slide 1">
@@ -50,10 +50,10 @@
                 <span class="carousel-control-next-icon" aria-hidden="true"></span>
                 <span class="visually-hidden">Next</span>
             </button>
-        </div>
+        </div> --}}
     </div>
 @endsection
-
+{{--
 @push('styles')
     <style>
         /* Membuat ukuran gambar di carousel konsisten */
@@ -62,4 +62,4 @@
             height: 400px; /* Menentukan tinggi gambar */
         }
     </style>
-@endpush
+@endpush --}}

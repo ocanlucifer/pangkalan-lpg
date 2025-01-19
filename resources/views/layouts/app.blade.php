@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}"> <!-- CSRF Token -->
-    <title>Cafe29</title>
+    <title>PANGKALAN LPG APEN SIHOMBING</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
@@ -130,7 +130,7 @@
         <a class="navbar-brand" href="{{ route('dashboard') }}">
             {{-- <img src="{{ asset('images/logo.jpg') }}" alt="Logo"> <!-- Path to your logo image -->
             Cafe29 --}}
-            &nbsp;<i class="fas fa-coffee"></i> Cafe29
+            &nbsp;<i class="fas fa-gas-pump"></i> PANGKALAN LPG APEN SIHOMBING
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
