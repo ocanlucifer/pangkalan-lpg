@@ -10,23 +10,19 @@ class Item extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'category_id', 'type_id', 'price', 'stock','active', 'user_id',];
-
-    public function category()
-    {
-        return $this->belongsTo(Category::class);
-    }
-
-    public function type()
-    {
-        return $this->belongsTo(Type::class);
-    }
+    protected $fillable = ['name', 'buy_price', 'sell_price', 'stock','active', 'user_id',];
 
     // Relasi ke SalesDetail
     public function purchaseDetails()
     {
         return $this->hasMany(PurchaseDetail::class); // Menghubungkan dengan SalesDetail
     }
+    // Relasi ke SalesDetail
+    public function salesDetails()
+    {
+        return $this->hasMany(SalesDetail::class); // Menghubungkan dengan SalesDetail
+    }
+
 
     // Relasi dengan User (transaksi dibuat oleh user)
     public function user()

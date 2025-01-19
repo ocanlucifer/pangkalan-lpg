@@ -14,9 +14,8 @@ return new class extends Migration
         Schema::create('items', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->foreignId('category_id')->constrained()->onDelete('cascade');
-            $table->foreignId('type_id')->constrained()->onDelete('cascade');
-            $table->decimal('price', 10, 2);
+            $table->decimal('buy_price', 10, 2);
+            $table->decimal('sell_price', 10, 2);
             $table->integer('stock');
             $table->boolean('active')->default(true);
             $table->foreignId('user_id')->constrained()->onDelete('cascade'); // ID pengguna yang melakukan transaksi

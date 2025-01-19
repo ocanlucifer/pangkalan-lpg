@@ -10,11 +10,11 @@ class Type extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name','user_id',];
+    protected $fillable = ['name', 'discount', 'user_id',];
 
-    public function items()
+    public function sales()
     {
-        return $this->hasMany(Item::class);
+        return $this->hasMany(Sale::class);
     }
 
     // Relasi dengan User (transaksi dibuat oleh user)

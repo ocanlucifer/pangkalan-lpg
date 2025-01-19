@@ -54,6 +54,7 @@ class TypeController extends Controller
         $request->validate(['name' => 'required|string|max:255']);
         Type::create([
             'name' => $request->name,
+            'discount' => $request->discount,
             'user_id' => Auth::User()->id,
         ]);
         // return redirect()->route('types.index')->with('success', 'Type created successfully.');
@@ -70,6 +71,7 @@ class TypeController extends Controller
         $request->validate(['name' => 'required|string|max:255']);
         $type->update([
             'name' => $request->name,
+            'discount' => $request->discount,
             'user_id' => Auth::User()->id,
         ]);
         // return redirect()->route('types.index')->with('success', 'Type updated successfully.');

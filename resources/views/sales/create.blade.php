@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
+<div class="">
     <div class="row justify-content-between">
         <div class="col-md-8">
             <h3 class="display-6">Buat Transaksi Penjualan</h3>
@@ -25,6 +25,11 @@
             </ul>
         </div>
     @endif
+    @if(session('error'))
+        <div class="alert alert-danger">
+            {!! session('error') !!}
+        </div>
+    @endif
 
     <form action="{{ route('sales.store') }}" method="POST" id="transaction-form">
         @csrf
@@ -32,18 +37,24 @@
         {{-- Select Customer and Header Discount --}}
         <div class="row mb-3">
             {{-- Select Customer --}}
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <label for="customer_id" class="form-label">Pelanggan</label>
-                <select name="customer_id" id="customer_id" class="form-control" required>
-                    <option value="">Pilih Pelanggan</option>
+                <select name="customer_id" id="customer_id" class="form-control" required readonly>
                     @foreach($customers as $customer)
-                        <option value="{{ $customer->id }}">{{ $customer->name }}</option>
+                        <option value="{{ $customer->id }}" selected>{{ $customer->name }}</option>
                     @endforeach
                 </select>
             </div>
 
+            <div class="col-md-4">
+                <label for="type_id" class="form-label">Tipe Pelanggan</label>
+                <select name="type_id" id="type_id" class="form-control" required readonly>
+                    <option value="{{ $types->id }}" selected>{{ $types->name }}</option>
+                </select>
+            </div>
+
             {{-- Header Discount --}}
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <label for="discount" class="form-label">Diskon Transaksi (Header)</label>
                 <input type="number" name="discount" id="discount" class="form-control" placeholder="Discount for the entire transaction" min="0" step="0.01" value="0">
             </div>
@@ -74,9 +85,9 @@
 
         {{-- Item Details --}}
         <div class="d-flex justify-content-between align-items-center">
-            <h3>Daftar Menu</h3>
+            <h3>Daftar Item</h3>
             <button type="button" id="add-item" class="btn btn-primary btn-sm">
-                <i class="bi bi-plus-circle"></i> Tambah Menu
+                <i class="bi bi-plus-circle"></i> Tambah Item
             </button>
         </div>
 
@@ -85,7 +96,7 @@
                 <thead class="table-dark">
                     <tr>
                         <th>#</th>
-                        <th>Menu</th>
+                        <th>Item</th>
                         <th>Harga</th>
                         <th>Qty</th>
                         <th>Diskon</th>
@@ -95,7 +106,7 @@
                 </thead>
                 <tbody id="items-container">
                     <tr id="empty-row">
-                        <td colspan="7" class="text-center">Belum ada menu yang di tambahkan</td>
+                        <td colspan="7" class="text-center">Belum ada Item yang di tambahkan</td>
                     </tr>
                 </tbody>
             </table>
@@ -155,9 +166,9 @@
             <td>${itemIndex + 1}</td>
             <td>
                 <select name="items[${itemIndex}][item_id]" class="form-control item-select" required>
-                    <option value="">Pilih Menu</option>
+                    <option value="">Pilih Item</option>
                     @foreach($items as $item)
-                        <option value="{{ $item->id }}" data-price="{{ $item->price }}">{{ $item->name }}</option>
+                        <option value="{{ $item->id }}" data-price="{{ $item->sell_price }}">{{ $item->name }}</option>
                     @endforeach
                 </select>
             </td>
@@ -196,7 +207,7 @@
             if (document.querySelectorAll('#items-container tr').length === 0) {
                 document.getElementById('items-container').innerHTML = `
                     <tr id="empty-row">
-                        <td colspan="7" class="text-center">Belum ada menu yang di tambahkan</td>
+                        <td colspan="7" class="text-center">Belum ada item yang di tambahkan</td>
                     </tr>
                 `;
             }

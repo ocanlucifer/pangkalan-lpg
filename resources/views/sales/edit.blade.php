@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
+<div class="">
     <div class="row justify-content-between">
         <div class="col-md-8">
             <h3 class="display-6">Ubah Transaksi Penjualan</h3>
@@ -25,6 +25,11 @@
             </ul>
         </div>
     @endif
+    @if(session('error'))
+        <div class="alert alert-danger">
+            {!! session('error') !!}
+        </div>
+    @endif
 
     <form action="{{ route('sales.update', $sale->id) }}" method="POST" id="transaction-form">
         @csrf
@@ -33,10 +38,9 @@
         {{-- Select Customer and Header Discount --}}
         <div class="row mb-3">
             {{-- Select Customer --}}
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <label for="customer_id" class="form-label">Pelanggan</label>
                 <select name="customer_id" id="customer_id" class="form-control" required>
-                    <option value="">Pilih Pelanggan</option>
                     @foreach($customers as $customer)
                         <option value="{{ $customer->id }}" {{ $sale->customer_id == $customer->id ? 'selected' : '' }}>
                             {{ $customer->name }}
@@ -45,8 +49,15 @@
                 </select>
             </div>
 
+            <div class="col-md-4">
+                <label for="type_id" class="form-label">Tipe Pelanggan</label>
+                <select name="type_id" id="type_id" class="form-control" required readonly>
+                    <option value="{{ $types->id }}" selected>{{ $types->name }}</option>
+                </select>
+            </div>
+
             {{-- Header Discount --}}
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <label for="discount" class="form-label">Diskon Transaksi (Header)</label>
                 <input type="number" name="discount" id="discount" class="form-control" placeholder="Discount for the entire transaction" min="0" step="0.01" value="{{ $sale->discount }}">
             </div>
@@ -104,20 +115,20 @@
                                 <select name="items[{{ $index }}][item_id]" class="form-control item-select" required>
                                     <option value="">Pilih Menu</option>
                                     @foreach($items as $item)
-                                        <option value="{{ $item->id }}" data-price="{{ $item->price }}" {{ $detail->menu_item_id == $item->id ? 'selected' : '' }}>
+                                        <option value="{{ $item->id }}" data-price="{{ $item->sell_price }}" {{ $detail->item_id == $item->id ? 'selected' : '' }}>
                                             {{ $item->name }}
                                         </option>
                                     @endforeach
                                 </select>
                             </td>
-                            <td class="item-price">Rp {{ number_format($detail->menuItem->price, 2) }}</td>
+                            <td class="item-price">Rp {{ number_format($detail->price, 2) }}</td>
                             <td>
                                 <input type="number" name="items[{{ $index }}][quantity]" class="form-control item-quantity" value="{{ $detail->quantity }}" min="1" required>
                             </td>
                             <td>
                                 <input type="number" name="items[{{ $index }}][discount]" class="form-control item-discount" value="{{ $detail->discount }}" min="0" step="0.01">
                             </td>
-                            <td class="item-subtotal">Rp {{ number_format(($detail->menuItem->price * $detail->quantity) - $detail->discount, 2) }}</td>
+                            <td class="item-subtotal">Rp {{ number_format(($detail->price * $detail->quantity) - $detail->discount, 2) }}</td>
                             <td>
                                 <button type="button" class="btn btn-danger btn-sm remove-item">
                                     <i class="bi bi-trash"></i>
@@ -172,9 +183,9 @@
             <td>${itemIndex + 1}</td>
             <td>
                 <select name="items[${itemIndex}][item_id]" class="form-control item-select" required>
-                    <option value="">Pilih Menu</option>
+                    <option value="">Pilih Item</option>
                     @foreach($items as $item)
-                        <option value="{{ $item->id }}" data-price="{{ $item->price }}">{{ $item->name }}</option>
+                        <option value="{{ $item->id }}" data-price="{{ $item->sell_price }}">{{ $item->name }}</option>
                     @endforeach
                 </select>
             </td>
@@ -213,7 +224,7 @@
             if (document.querySelectorAll('#items-container tr').length === 0) {
                 document.getElementById('items-container').innerHTML = `
                     <tr id="empty-row">
-                        <td colspan="7" class="text-center">Belum ada menu yang di tambahkan</td>
+                        <td colspan="7" class="text-center">Belum ada Item yang di tambahkan</td>
                     </tr>
                 `;
             }

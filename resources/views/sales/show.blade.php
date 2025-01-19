@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
+<div class="">
     <div class="row justify-content-between">
         <div class="col-md-8">
             <h3 class="display-6">Detail Transaksi #{{ $sale->transaction_number }}</h3>
@@ -64,9 +64,11 @@
                     <h6 class="mb-0 text-primary">Informasi Pelanggan</h6>
                 </div>
                 <div class="card-body">
+                    <p class="mb-2"><strong>NIK:</strong> {{ $sale->customer->nik }}</p>
                     <p class="mb-2"><strong>Nama:</strong> {{ $sale->customer->name }}</p>
                     <p class="mb-2"><strong>Alamat:</strong> {{ $sale->customer->address ?? 'tidak ada alamat yang di berikan' }}</p>
-                    <p class="mb-0"><strong>Kontak:</strong> {{ $sale->customer->contact ?? 'tidak ada kontak yang di berikan' }}</p>
+                    <p class="mb-2"><strong>Kontak:</strong> {{ $sale->customer->contact ?? 'tidak ada kontak yang di berikan' }}</p>
+                    <p class="mb-0"><strong>Tipe Pelanggan:</strong> {{ $sale->type->name ?? 'tidak ada jenis yang di berikan' }}</p>
                 </div>
             </div>
         </div>
@@ -130,7 +132,7 @@
                     @foreach($sale->details as $detail)
                         <tr>
                             <td class="text-center">{{ $loop->iteration }}</td>
-                            <td>{{ $detail->menuItem->name }}</td>
+                            <td>{{ $detail->Item->name }}</td>
                             <td class="text-end">Rp {{ number_format($detail->price, 2) }}</td>
                             <td class="text-center">{{ $detail->quantity }}</td>
                             <td class="text-end">Rp {{ number_format($detail->price * $detail->quantity, 2) }}</td>
@@ -184,7 +186,7 @@
                         @foreach($sale->details as $detail)
                         <tr>
                             <td style="text-align: left; padding: 3px;">{{ $loop->iteration }}</td>
-                            <td style="text-align: left; padding: 3px;">{{ $detail->menuItem->name }}</td>
+                            <td style="text-align: left; padding: 3px;">{{ $detail->Item->name }}</td>
                             <td style="text-align: right; padding: 3px;">Rp {{ number_format($detail->price, 2) }}</td>
                             <td style="text-align: center; padding: 3px;">{{ $detail->quantity }}</td>
                             <td style="text-align: right; padding: 3px;">Rp {{ number_format($detail->subtotal, 2) }}</td>

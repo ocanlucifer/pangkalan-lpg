@@ -18,12 +18,12 @@ class VendorSeeder extends Seeder
         $faker = Faker::create();
 
         // Create 10 vendor records
-        for ($i = 0; $i < 23; $i++) {
+        for ($i = 0; $i < 1; $i++) {
             DB::table('vendors')->insert([
-                'name' => $faker->company,               // Generate a fake company name
+                'name' => 'Pertamnina',//$faker->company,               // Generate a fake company name
                 'address' => $faker->address,            // Generate a fake address
                 'contact' => $faker->phoneNumber,        // Generate a fake phone number
-                'active' => $faker->boolean,             // Randomly assign active status (true or false)
+                'active' => 1,//$faker->boolean,             // Randomly assign active status (true or false)
                 'user_id' => 1,
                 'created_at' => now(),
                 'updated_at' => now(),

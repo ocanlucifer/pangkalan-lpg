@@ -5,8 +5,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Item;
-use App\Models\Category;
-use App\Models\Type;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -22,70 +20,46 @@ class ItemController extends Controller
         // Start building the query for items
         $query = Item::query()
             ->when($search, function ($query, $search) {
-                return $query->where('items.name', 'LIKE', "%$search%")  // Specify items.name
-                            ->orWhere('items.price', 'LIKE', "%$search%")
-                            ->orWhere('items.stock', 'LIKE', "%$search%")
-                            ->orWhereHas('category', function ($query2) use ($search) {
-                                $query2->where('categories.name', 'LIKE', "%$search%");  // Specify categories.name
-                            })
-                            ->orWhereHas('type', function ($query3) use ($search) {
-                                $query3->where('types.name', 'LIKE', "%$search%");  // Specify types.name
-                            });
+                return $query->where('name', 'LIKE', "%$search%") ;
             })
-            ->with(['category', 'type']);
-
-        // Handle sorting logic
-        if ($sortBy === 'category_name') {
-            // If sorting by category_name, join with categories table and order by category name
-            $query->join('categories', 'items.category_id', '=', 'categories.id')
-                ->select('items.*', 'categories.name as category_name')  // Select items columns and alias category.name
-                ->orderBy('categories.name', $order);  // Sort by the category's name column
-        } else if($sortBy === 'type_name') {
-            // If sorting by type_name, join with types table and order by category name
-            $query->join('types', 'items.type_id', '=', 'types.id')
-                ->select('items.*', 'types.name as type_name')  // Select items columns and alias type.name
-                ->orderBy('types.name', $order);  // Sort by the type's name column
-        } else {
-            // Otherwise, use the normal sortBy (e.g., 'name', 'price', etc.)
-            $query->select('items.*')  // Select only items columns if sorting by item fields
-                ->orderBy($sortBy, $order);
-        }
+            ->orderBy($sortBy, $order);
 
         // Get paginated results
         $items = $query->paginate($perPage);
-        $categories = Category::All();
-        $types = Type::All();
 
         // If the request is an AJAX request, return only the table view
         if ($request->ajax()) {
-            return view('items.table', compact('items', 'search', 'sortBy', 'order', 'perPage', 'categories', 'types'));
+            return view('items.table', compact('items', 'search', 'sortBy', 'order', 'perPage'));
         }
+        // if ($request->ajax()) {
+        //     if ($request->param == 1){
+        //         return view('items.index', compact('items', 'search', 'sortBy', 'order', 'perPage'))->render();
+        //     } else {
+        //         return view('items.table', compact('items', 'search', 'sortBy', 'order', 'perPage'))->render();
+        //     }
+        // }
 
         // Return the full page view
-        return view('items.index', compact('items', 'search', 'sortBy', 'order', 'perPage', 'categories', 'types'));
+        return view('items.index', compact('items', 'search', 'sortBy', 'order', 'perPage'));
     }
 
     public function create()
     {
-        $categories = Category::All();
-        $types = Type::All();
-        return view('items.create', compact('categories', 'types'));
+        return view('items.create');
     }
 
     public function store(Request $request)
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'category_id' => 'required|exists:categories,id',
-            'type_id' => 'required|exists:types,id',
-            'price' => 'required|numeric',
+            'buy_price' => 'required|numeric',
+            'sell_price' => 'required|numeric',
             'active' => 'required|boolean', // Validasi kolom active
         ]);
         Item::create([
             'name'  => $request->name,
-            'category_id'   => $request->category_id,
-            'type_id'       => $request->type_id,
-            'price'         => $request->price,
+            'buy_price'         => $request->buy_price,
+            'sell_price'         => $request->sell_price,
             'stock'         => 0,
             'active'        => $request->active ?? true,
             'user_id' => Auth::User()->id,
@@ -97,25 +71,21 @@ class ItemController extends Controller
 
     public function edit(Item $item)
     {
-        $categories = Category::All();
-        $types = Type::All();
-        return view('items.edit', compact('item', 'categories', 'types'));
+        return view('items.edit', compact('item'));
     }
 
     public function update(Request $request, Item $item)
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'category_id' => 'required|exists:categories,id',
-            'type_id' => 'required|exists:types,id',
-            'price' => 'required|numeric',
+            'buy_price' => 'required|numeric',
+            'sell_price' => 'required|numeric',
             'active' => 'required|boolean', // Validasi kolom active
         ]);
         $item->update([
             'name'  => $request->name,
-            'category_id'   => $request->category_id,
-            'type_id'       => $request->type_id,
-            'price'         => $request->price,
+            'buy_price'         => $request->buy_price,
+            'sell_price'         => $request->sell_price,
             'active'        => $request->active ?? true,
             'user_id' => Auth::User()->id,
         ]);

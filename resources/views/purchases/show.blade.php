@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
+<div class="">
     <div class="row justify-content-between">
         <div class="col-md-8">
             <h3 class="display-6">Detail Transaksi #{{ $purchase->transaction_number }}</h3>

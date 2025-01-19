@@ -10,7 +10,14 @@ class Customer extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'address', 'contact', 'active', 'user_id',];
+    protected $fillable = [
+        'nik',
+        'name',
+        'address',
+        'contact',
+        'ktp_image',
+        'active',
+        'user_id',];
 
     public function sales()
     {
@@ -22,4 +29,6 @@ class Customer extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+
 }

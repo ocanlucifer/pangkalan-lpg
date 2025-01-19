@@ -24,9 +24,7 @@ class DatabaseSeeder extends Seeder
             VendorSeeder::class, // Call the VendorSeeder
             CustomerSeeder::class, // Call the CustomerSeeder
             TypeSeeder::class,
-            CategorySeeder::class,
             ItemSeeder::class,
-            MenuItemSeeder::class,
         ]);
     }
 }

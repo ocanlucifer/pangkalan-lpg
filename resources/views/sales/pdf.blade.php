@@ -12,6 +12,7 @@
         <strong style="font-size: 12px;">Pelanggan:</strong> <span style="font-size: 12px;">{{ $sale->customer->name }}</span><br>
         <strong style="font-size: 12px;">Alamat:</strong> <span style="font-size: 12px;">{{ $sale->customer->address ?? 'No address provided' }}</span><br>
         <strong style="font-size: 12px;">Kontak:</strong> <span style="font-size: 12px;">{{ $sale->customer->contact ?? 'No contact provided' }}</span><br><br>
+        <strong style="font-size: 12px;">Tipe Pelanggan:</strong> <span style="font-size: 12px;">{{ $sale->type->name ?? 'No type provided' }}</span><br><br>
 
         <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
             <thead>
@@ -27,7 +28,7 @@
                 @foreach($sale->details as $detail)
                 <tr>
                     <td style="text-align: left; padding: 3px;">{{ $loop->iteration }}</td>
-                    <td style="text-align: left; padding: 3px;">{{ $detail->MenuItem->name }}</td>
+                    <td style="text-align: left; padding: 3px;">{{ $detail->Item->name }}</td>
                     <td style="text-align: right; padding: 3px;">Rp {{ number_format($detail->price, 2) }}</td>
                     <td style="text-align: center; padding: 3px;">{{ $detail->quantity }}</td>
                     <td style="text-align: right; padding: 3px;">Rp {{ number_format($detail->subtotal, 2) }}</td>

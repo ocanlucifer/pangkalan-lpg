@@ -2,7 +2,7 @@
 
 @section('content')
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1 class="mb-0">Kelola Tipe</h1>
+        <h1 class="mb-0">Kelola Tipe Pelanggan</h1>
         <button class="btn btn-primary btn-sm" id="open-create-form">
             <i class="bi bi-plus-lg" style="font-size: 1rem;"></i> Tambah Tipe
         </button>
@@ -16,8 +16,16 @@
     <!-- Filter, Sort, and Search Form -->
     <form id="filter-form" class="mb-4">
         <div class="row g-2 justify-content-end">
-            <div class="col-md-3 col-sm-12">
-                <input type="text" name="search" class="form-control form-control-sm" placeholder="Cari Berdasarkan Nama" id="search" value="{{ $search }}">
+            <div class="col-md-3 col-sm-12 position-relative">
+                <input
+                    type="text"
+                    name="search"
+                    class="form-control form-control-sm ps-5"
+                    placeholder="Cari berdasarkan nama"
+                    id="search"
+                    value="{{ $search }}"
+                />
+                <i class="fas fa-search position-absolute top-50 start-0 translate-middle-y ms-3"></i> <!-- Icon inside the input -->
             </div>
             {{-- <div class="col-md-2 col-sm-6"> --}}
                 <select name="sort_by" id="sort_by" class="form-select form-select-sm" hidden>
@@ -61,6 +69,10 @@
                         <div class="mb-3">
                             <label for="type-name" class="form-label">Nama Tipe</label>
                             <input type="text" class="form-control" id="type-name" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="type-discount" class="form-label">Potongan Harga (%)</label>
+                            <input type="text" class="form-control" id="type-discount" name="discount" required>
                         </div>
                     </form>
                 </div>
@@ -145,9 +157,11 @@
         $(document).on('click', '.edit-type', function() {
             const typeId = $(this).data('id');
             const typeName = $(this).data('name');
+            const typeDiscount = $(this).data('discount');
             $('#typeModalLabel').text('Ubah Tipe');
             $('#type-id').val(typeId);
             $('#type-name').val(typeName);
+            $('#type-discount').val(typeDiscount);
             $('#typeModal').modal('show');
         });
 

@@ -10,13 +10,15 @@ class Sale extends Model
     use HasFactory;
 
     // Kolom yang dapat diisi secara mass-assignment
-    protected $fillable = ['customer_id',
+    protected $fillable = [
+        'customer_id',
         'total_price',
         'discount',
         'transaction_number',
         'user_id',
         'payment_amount',
         'change_amount',
+        'type_id',
     ];
 
     protected static function boot()
@@ -97,5 +99,11 @@ class Sale extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+
+    public function type()
+    {
+        return $this->belongsTo(Type::class);
     }
 }

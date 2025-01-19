@@ -31,6 +31,14 @@ class VendorController extends Controller
             return view('vendors.table', compact('vendors', 'search', 'sortBy', 'order', 'perPage'))->render();
         }
 
+        // if ($request->ajax()) {
+        //     if ($request->param == 1){
+        //         return view('vendors.index', compact('vendors', 'search', 'sortBy', 'order', 'perPage'))->render();
+        //     } else {
+        //         return view('vendors.table', compact('vendors', 'search', 'sortBy', 'order', 'perPage'))->render();
+        //     }
+        // }
+
         return view('vendors.index', compact('vendors', 'search', 'sortBy', 'order', 'perPage'));
     }
 

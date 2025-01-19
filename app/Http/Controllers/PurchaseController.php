@@ -25,7 +25,7 @@ class PurchaseController extends Controller
         $order = $request->get('order', 'asc');  // Default ascending
         $search = $request->get('search', '');
         $perPage = $request->get('per_page', 10); // Default to 10 per page
-        $fromDate = $request->input('from_date', now()->toDateString());
+        $fromDate = $request->input('from_date', now()->subDays(7)->toDateString());
         $toDate = $request->input('to_date', now()->toDateString());
 
         $purchases = PurchaseHeader::query()

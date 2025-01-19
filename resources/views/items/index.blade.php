@@ -16,15 +16,22 @@
     <!-- Filter, Sort, and Search Form -->
     <form id="filter-form" class="mb-4">
         <div class="row g-2 justify-content-end">
-            <div class="col-md-3 col-sm-12">
-                <input type="text" name="search" class="form-control form-control-sm" placeholder="Cari berdasarkan nama, kategori, tipe, atau harga" id="search" value="{{ $search }}">
+            <div class="col-md-3 col-sm-12 position-relative">
+                <input
+                    type="text"
+                    name="search"
+                    class="form-control form-control-sm ps-5"
+                    placeholder="Cari berdasarkan nama"
+                    id="search"
+                    value="{{ $search }}"
+                />
+                <i class="fas fa-search position-absolute top-50 start-0 translate-middle-y ms-3"></i> <!-- Icon inside the input -->
             </div>
             {{-- <div class="col-md-2 col-sm-6"> --}}
                 <select name="sort_by" id="sort_by" class="form-select form-select-sm" hidden>
                     <option value="name" {{ $sortBy == 'name' ? 'selected' : '' }}>Name</option>
-                    <option value="category_name" {{ $sortBy == 'category_name' ? 'selected' : '' }}>Category</option>
-                    <option value="type_name" {{ $sortBy == 'type_name' ? 'selected' : '' }}>Type</option>
-                    <option value="price" {{ $sortBy == 'price' ? 'selected' : '' }}>Price</option>
+                    <option value="buy_price" {{ $sortBy == 'buy_price' ? 'selected' : '' }}>Buy Price</option>
+                    <option value="sell_price" {{ $sortBy == 'sell_price' ? 'selected' : '' }}>Sell Price</option>
                     <option value="stock" {{ $sortBy == 'stock' ? 'selected' : '' }}>Stock</option>
                     <option value="active" {{ $sortBy == 'active' ? 'selected' : '' }}>Status</option>
                 </select>
@@ -67,24 +74,12 @@
                             <input type="text" class="form-control" id="item-name" name="name" required>
                         </div>
                         <div class="mb-3">
-                            <label for="item-category_id" class="form-label">Kategori</label>
-                            <select name="category_id" id="item-category_id" class="form-select" required>
-                                @foreach ($categories as $category)
-                                    <option value="{{ $category->id }}">{{ $category->name }}</option>
-                                @endforeach
-                            </select>
+                            <label for="item-buyprice" class="form-label">Harga Beli</label>
+                            <input type="text" class="form-control" id="item-buyprice" name="buy_price" required>
                         </div>
                         <div class="mb-3">
-                            <label for="item-type_id" class="form-label">Tipe</label>
-                            <select name="type_id" id="item-type_id" class="form-select" required>
-                                @foreach ($types as $type)
-                                    <option value="{{ $type->id }}">{{ $type->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label for="item-price" class="form-label">Harga</label>
-                            <input type="text" class="form-control" id="item-price" name="price" required>
+                            <label for="item-sellprice" class="form-label">Harga Jual</label>
+                            <input type="text" class="form-control" id="item-sellprice" name="sell_price" required>
                         </div>
                         {{-- <div class="mb-3"> --}}
                             <label for="item-stock" class="form-label" hidden>Stok</label>
@@ -178,7 +173,8 @@
             $('#item-name').val(item.name);
             $('#item-category_id').val(item.category_id);
             $('#item-type_id').val(item.type_id);
-            $('#item-price').val(item.price);
+            $('#item-buyprice').val(item.buyprice);
+            $('#item-sellprice').val(item.sellprice);
             $('#item-stock').val(item.stock);
             $('#item-status').val(item.active);
             $('#itemModal').modal('show');
