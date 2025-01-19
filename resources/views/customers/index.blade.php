@@ -16,14 +16,21 @@
     <!-- Filter, Sort, and Search Form -->
     <form id="filter-form" class="mb-4">
         <div class="row g-2 justify-content-end">
-            <div class="col-md-3 col-sm-12">
-                <input type="text" name="search" class="form-control form-control-sm" placeholder="cari berdasarkan nama, kontak atau alamat" id="search" value="{{ $search }}">
+            <div class="col-md-3 col-sm-12 position-relative">
+                <input
+                    type="text"
+                    name="search"
+                    class="form-control form-control-sm ps-5"
+                    placeholder="cari berdasarkan NIK atau nama
+                    id="search"
+                    value="{{ $search }}"
+                />
+                <i class="fas fa-search position-absolute top-50 start-0 translate-middle-y ms-3"></i> <!-- Icon inside the input -->
             </div>
             {{-- <div class="col-md-2 col-sm-6"> --}}
                 <select name="sort_by" id="sort_by" class="form-select form-select-sm" hidden>
+                    <option value="nik" {{ $sortBy == 'nik' ? 'selected' : '' }}>NIK</option>
                     <option value="name" {{ $sortBy == 'name' ? 'selected' : '' }}>Name</option>
-                    <option value="contact" {{ $sortBy == 'contact' ? 'selected' : '' }}>Contact</option>
-                    <option value="address" {{ $sortBy == 'address' ? 'selected' : '' }}>Address</option>
                     <option value="active" {{ $sortBy == 'active' ? 'selected' : '' }}>Status</option>
                 </select>
             {{-- </div>
@@ -57,9 +64,13 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <form id="customer-form">
+                    <form id="customer-form" enctype="multipart/form-data">
                         @csrf
                         <input type="hidden" name="id" id="customer-id">
+                        <div class="mb-3">
+                            <label for="customer-nik" class="form-label">NIK Pelanggan</label>
+                            <input type="text" class="form-control" id="customer-nik" name="nik" required>
+                        </div>
                         <div class="mb-3">
                             <label for="customer-name" class="form-label">Nama Pelanggan</label>
                             <input type="text" class="form-control" id="customer-name" name="name" required>
@@ -69,8 +80,12 @@
                             <input type="text" class="form-control" id="customer-contact" name="contact" required>
                         </div>
                         <div class="mb-3">
-                            <label for="customer-address" class="form-label">Alamat Planggan</label>
+                            <label for="customer-address" class="form-label">Alamat Pelanggan</label>
                             <input type="text" class="form-control" id="customer-address" name="address" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="customer-ktp" class="form-label">Foto KTP</label>
+                            <input type="file" class="form-control" id="customer-ktp" name="ktp_image" accept="image/*">
                         </div>
                         <div class="mb-3">
                             <label for="customer-status" class="form-label">Status</label>
@@ -79,7 +94,12 @@
                                 <option value="0">Tidak Aktif</option>
                             </select>
                         </div>
+                        <div id="ktp-preview-container" class="mb-3">
+                            <label for="customer-ktp-preview" class="form-label">Pratinjau KTP</label>
+                            <img id="customer-ktp-preview" src="" alt="Pratinjau KTP" class="img-fluid d-none" style="max-width: 100%; height: auto;">
+                        </div>
                     </form>
+
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
@@ -153,37 +173,56 @@
         });
 
         // Open the Edit customer form
-        $(document).on('click', '.edit-customer', function() {
+        $(document).on('click', '.edit-customer', function () {
             const customer = $(this).data();
             $('#customerModalLabel').text('Ubah Data Pelanggan');
             $('#customer-id').val(customer.id);
+            $('#customer-nik').val(customer.nik);
             $('#customer-name').val(customer.name);
             $('#customer-contact').val(customer.contact);
             $('#customer-address').val(customer.address);
             $('#customer-status').val(customer.active);
+
+            // Jika ada KTP, tampilkan preview
+            if (customer.ktp_image) {
+                $('#customer-ktp-preview').removeClass('d-none').attr('src', `/storage/${customer.ktp_image}`);
+            } else {
+                $('#customer-ktp-preview').addClass('d-none').attr('src', '');
+            }
+
             $('#customerModal').modal('show');
         });
 
+
         // Save or update customer
-        $('#save-customer').on('click', function() {
-            const formData = $('#customer-form').serialize();
+        $('#save-customer').on('click', function () {
+            const formData = new FormData($('#customer-form')[0]); // Menggunakan FormData untuk mendukung file upload
             const customerId = $('#customer-id').val();
             const url = customerId ? `/customers/${customerId}` : '/customers';
-            const method = customerId ? 'PUT' : 'POST';
+            const method = customerId ? 'POST' : 'POST';
+
+            if (customerId) {
+                formData.append('_method', 'PUT'); // Tambahkan metode PUT jika sedang mengedit
+            }
 
             $.ajax({
                 url: url,
                 method: method,
                 data: formData,
-                success: function() {
+                processData: false, // Jangan memproses data (karena ada file)
+                contentType: false, // Jangan tetapkan header konten secara otomatis
+                success: function () {
                     $('#success-message').removeClass('d-none').text('Data Pelanggan Berhasil Disimpan!');
                     setTimeout(() => { $('#success-message').addClass('d-none'); }, 3000);
                     $('#customerModal').modal('hide');
                     fetchCustomers();
                 },
-                error: function() { alert('Terjadi kesalahan ketika menyimpan data pelanggan.'); }
+                error: function () {
+                    alert('Terjadi kesalahan ketika menyimpan data pelanggan.');
+                }
             });
         });
+
 
         // Delete customer
         $(document).on('click', '.delete-customer', function() {

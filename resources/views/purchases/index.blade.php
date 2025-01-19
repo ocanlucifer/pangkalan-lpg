@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
+<div class="">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h1 class="mb-0">Daftar Transaksi Pembelian</h1>
         <a href="{{ route('purchases.create') }}" class="btn btn-primary btn-sm">Buat Transaksi Baru</a>
@@ -10,8 +10,16 @@
     <!-- Filter, Sort, and Search Form -->
     <form id="filter-form" class="mb-4">
         <div class="row g-2 justify-content-end">
-            <div class="col-md-3 col-sm-12">
-                <input type="text" name="search" class="form-control form-control-sm" placeholder="Cari berdasarkan Nomor Atau Tanggal Transaksi" id="search" value="{{ $search }}">
+            <div class="col-md-3 col-sm-12 position-relative">
+                <input
+                    type="text"
+                    name="search"
+                    class="form-control form-control-sm ps-5"
+                    placeholder="Cari berdasarkan Nomor Atau Tanggal Transaksi"
+                    id="search"
+                    value="{{ $search }}"
+                />
+                <i class="fas fa-search position-absolute top-50 start-0 translate-middle-y ms-3"></i> <!-- Icon inside the input -->
             </div>
             <div class="col-md-2 col-sm-6">
                 <input type="date" name="from_date" class="form-control form-control-sm" value="{{ $fromDate }}">

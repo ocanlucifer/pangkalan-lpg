@@ -31,6 +31,14 @@ class UserController extends Controller
             return view('users.table', compact('users', 'search', 'sortBy', 'order', 'perPage'));
         }
 
+        // if ($request->ajax()) {
+        //     if ($request->param == 1){
+        //         return view('users.index', compact('users', 'search', 'sortBy', 'order', 'perPage'))->render();
+        //     } else {
+        //         return view('users.table', compact('users', 'search', 'sortBy', 'order', 'perPage'))->render();
+        //     }
+        // }
+
         // return view('users.index', compact('users'));
         return view('users.index', compact('users', 'search', 'sortBy', 'order', 'perPage'));
     }

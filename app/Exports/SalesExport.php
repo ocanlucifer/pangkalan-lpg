@@ -24,7 +24,7 @@ class SalesExport implements FromCollection, WithHeadings
                 $data[] = [
                     'Nomor Transaksi' => $sale->transaction_number,
                     'Pelanggan' => $sale->customer->name,
-                    'Nama Menu' => $detail->menuItem->name,
+                    'Nama Menu' => $detail->Item->name,
                     'Quantity' => $detail->quantity,
                     'Harga' => $detail->price,
                     'Diskon' => $detail->discount,

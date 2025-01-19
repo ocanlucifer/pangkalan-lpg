@@ -4,13 +4,10 @@
 use App\Http\Controllers\AuthController;
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\TypeController;
 use App\Http\Controllers\ItemController;
-use App\Http\Controllers\MenuController;
 use App\Http\Controllers\VendorController;
 use App\Http\Controllers\CustomerController;
-use App\Http\Controllers\IssuingController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\UserController;
@@ -49,40 +46,27 @@ Route::middleware('auth')->group(function () {
 
 //route for admin & owner
 Route::middleware(['auth', RoleMiddleware::class . ':admin,owner'])->group(function () {
+    // Purchase Routes
+    Route::resource('purchases', PurchaseController::class);
+
     // Route untuk menampilkan laporan pembelian
     Route::get('/pembelian/reports', [PurchaseController::class, 'generateReport'])->name('pembelian.reports');
     Route::get('/pembelian/printReportPDF', [PurchaseController::class, 'printReportPDF'])->name('pembelian.printReportPDF');
-
-    // Route untuk menampilkan laporan pengeluaran
-    Route::get('/pengeluaran/reports', [IssuingController::class, 'generateReport'])->name('pengeluaran.reports');
-    Route::get('/pengeluaran/printReportPDF', [IssuingController::class, 'printReportPDF'])->name('pengeluaran.printReportPDF');
 
     //route report mutasi
     Route::get('/stock-mutations', [StockMutationController::class, 'index'])->name('stock-mutations');
     Route::get('/stock-mutations/printReportPDF', [StockMutationController::class, 'printReportPDF'])->name('stock-mutations.printReportPDF');
 });
 
-//route for admin, user, pelayan, & cashier
-Route::middleware(['auth', RoleMiddleware::class . ':admin,user,pelayan,cashier'])->group(function () {
+//route for admin, owner & cashier
+Route::middleware(['auth', RoleMiddleware::class . ':admin,owner,user,cashier'])->group(function () {
     // Sale Routes
     Route::resource('sales', SaleController::class);
     Route::get('/sales/{id}/print-pdf', [SaleController::class, 'printPDF'])->name('sales.print-pdf');
-});
-
-//route for admin, owner & cashier
-Route::middleware(['auth', RoleMiddleware::class . ':admin,owner,cashier'])->group(function () {
     // Report Routes
     // Route untuk menampilkan laporan penjualan
     Route::get('/penjualan/reports', [SaleController::class, 'generateSalesReport'])->name('penjualan.reports');
     Route::get('/penjualan/printReportPDF', [SaleController::class, 'printReportPDF'])->name('penjualan.printReportPDF');
-});
-
-//route for admin, owner & pelayan
-Route::middleware(['auth', RoleMiddleware::class . ':admin,owner,pelayan'])->group(function () {
-    // Purchase Routes
-    Route::resource('purchases', PurchaseController::class);
-    // Issuing Routes
-    Route::resource('issuings', IssuingController::class);
 });
 
 //route for admin
@@ -94,9 +78,6 @@ Route::middleware(['auth', RoleMiddleware::class . ':admin'])->group(function ()
             // Add Route to reset Password
             Route::post('/users/{id}/reset-password', [UserController::class, 'resetPassword'])->name('users.resetPassword');
 
-    // Category Routes
-    Route::resource('categories', CategoryController::class);
-
     // Type Routes
     Route::resource('types', TypeController::class);
 
@@ -104,11 +85,6 @@ Route::middleware(['auth', RoleMiddleware::class . ':admin'])->group(function ()
     Route::resource('items', ItemController::class);
         // Add a route to toggle item active status
         Route::post('/items/{item}/toggle-active', [ItemController::class, 'toggleActive'])->name('items.toggleActive');
-
-     // Menu Routes
-    Route::resource('menus', MenuController::class);
-        // Add a route to toggle item active status
-        Route::post('/menus/{menu}/toggle-active', [MenuController::class, 'toggleActive'])->name('menus.toggleActive');
 
     // Vendor Routes
     Route::resource('vendors', VendorController::class);

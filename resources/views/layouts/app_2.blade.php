@@ -142,11 +142,11 @@
                 <i class="fas fa-cogs"></i> Master Data
             </a>
             <div class="collapse" id="masterMenu">
-                <a href="{{ route('types.index') }}" class="ms-3"><i class="fas fa-cogs"></i> Jenis Pelanggan</a>
-                <a href="{{ route('items.index') }}" class="ms-3"><i class="fas fa-cube"></i> Pengaturan Produk</a>
-                <a href="{{ route('vendors.index') }}" class="ms-3"><i class="fas fa-truck"></i> Supplier</a>
-                <a href="{{ route('customers.index') }}" class="ms-3"><i class="fas fa-users"></i> Pelanggan</a>
-                <a href="{{ route('users.index') }}" class="ms-3"><i class="fas fa-user-cog"></i> Pengguna</a>
+                <a href="#" data-url="{{ route('types.index') }}" class="ms-3 menu-link"><i class="fas fa-cogs"></i> Jenis Pelanggan</a>
+                <a href="#" data-url="{{ route('items.index') }}" class="ms-3 menu-link"><i class="fas fa-cube"></i> Pengaturan Produk</a>
+                <a href="#" data-url="{{ route('vendors.index') }}" class="ms-3 menu-link"><i class="fas fa-truck"></i> Supplier</a>
+                <a href="#" data-url="{{ route('customers.index') }}" class="ms-3 menu-link"><i class="fas fa-users"></i> Pelanggan</a>
+                <a href="#" data-url="{{ route('users.index') }}" class="ms-3 menu-link"><i class="fas fa-user-cog"></i> Pengguna</a>
             </div>
             {{-- @endif --}}
 
@@ -154,17 +154,17 @@
                 <i class="fas fa-exchange-alt"></i> Transaksi
             </a>
             <div class="collapse" id="transaksiMenu">
-                <a href="{{ route('sales.index') }}" class="ms-3"><i class="fas fa-cash-register"></i> Penjualan</a>
-                <a href="{{ route('purchases.index') }}" class="ms-3"><i class="fas fa-shopping-cart"></i> Pembelian</a>
+                <a href="#" data-url="{{ route('sales.index') }}" class="ms-3 menu-link"><i class="fas fa-cash-register"></i> Penjualan</a>
+                <a href="#" data-url="{{ route('purchases.index') }}" class="ms-3 menu-link"><i class="fas fa-shopping-cart"></i> Pembelian</a>
             </div>
 
             <a href="#" data-bs-toggle="collapse" data-bs-target="#reportMenu" aria-expanded="false">
                 <i class="fas fa-chart-bar"></i> Laporan
             </a>
             <div class="collapse" id="reportMenu">
-                <a href="{{ route('penjualan.reports') }}" class="ms-3"><i class="fas fa-chart-line"></i> Laporan Penjualan</a>
-                <a href="{{ route('pembelian.reports') }}" class="ms-3"><i class="fas fa-credit-card"></i> Laporan Pembelian</a>
-                <a href="{{ route('stock-mutations') }}" class="ms-3"><i class="fas fa-sync-alt"></i> Mutasi Stok</a>
+                <a href="#" data-url="{{ route('penjualan.reports') }}" class="ms-3 menu-link"><i class="fas fa-chart-line"></i> Laporan Penjualan</a>
+                <a href="#" data-url="{{ route('pembelian.reports') }}" class="ms-3 menu-link"><i class="fas fa-credit-card"></i> Laporan Pembelian</a>
+                <a href="#" data-url="{{ route('stock-mutations') }}" class="ms-3 menu-link"><i class="fas fa-sync-alt"></i> Mutasi Stok</a>
             </div>
         </div>
 
@@ -178,8 +178,8 @@
     </div>
 
     <!-- Main Content -->
-    <div class="content">
-        @yield('content')
+    <div class="content" id="main-content">
+        {{-- @yield('content') --}}
     </div>
 
     <!-- Change Password Modal -->
@@ -225,6 +225,37 @@
             const sidebar = document.getElementById('sidebar');
             sidebar.classList.toggle('collapsed');
         }
+
+        $(document).ready(function () {
+            // Handle click event on menu links
+            $('.menu-link').on('click', function (e) {
+                e.preventDefault(); // Prevent default link behavior
+                const url = $(this).data('url'); // Get the URL from data-url attribute
+                const param = '1';
+
+                // Menambahkan parameter query ke URL menggunakan URLSearchParams
+                const queryParams = new URLSearchParams();
+                queryParams.append('param', param);
+
+                // Gabungkan URL dengan parameter
+                const finalUrl = url + '?' + queryParams.toString();
+
+                if (url) {
+                    // Load content into #main-content
+                    $('#main-content').html('<div class="text-center mt-5"><i class="fas fa-spinner fa-spin fa-3x"></i></div>'); // Show loading spinner
+                    $.ajax({
+                        url: finalUrl,
+                        method: 'GET',
+                        success: function (response) {
+                            $('#main-content').html(response); // Replace content with AJAX response
+                        },
+                        error: function () {
+                            $('#main-content').html('<div class="text-danger text-center mt-5">Gagal memuat konten. Silakan coba lagi.</div>');
+                        }
+                    });
+                }
+            });
+        });
     </script>
     @stack('scripts')
 </body>

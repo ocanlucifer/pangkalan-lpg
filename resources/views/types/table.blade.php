@@ -3,7 +3,7 @@
         <thead class="table-dark">
             <tr>
                 <th class="col-0">No.</th>
-                <th class="col-8">
+                <th class="col-6">
                     <a href="#" class="sort-link nav-link" data-sort-by="name" data-order="{{ $order === 'asc' ? 'desc' : 'asc' }}">
                         Nama
                         @if ($sortBy === 'name')
@@ -11,6 +11,7 @@
                         @endif
                     </a>
                 </th>
+                <th class="col-3">Diskon</th>
                 <th>Di Daftarkan Oleh</th>
                 <th class="col-4 text-center">Aksi</th>
             </tr>
@@ -20,10 +21,11 @@
                 <tr>
                     <td class="text-center">{{ $loop->iteration }}</td>
                     <td>{{ $type->name }}</td>
+                    <td>{{ $type->discount }} %</td>
                     <td>{{ $type->user->name }}</td>
                     <td class="text-center">
                         <!-- Edit Button with Tooltip -->
-                        <button class="btn btn-warning btn-sm edit-type" data-id="{{ $type->id }}" data-name="{{ $type->name }}" data-bs-toggle="tooltip" title="Ubah">
+                        <button class="btn btn-warning btn-sm edit-type" data-id="{{ $type->id }}" data-name="{{ $type->name }}" data-discount="{{ $type->discount }}"  data-bs-toggle="tooltip" title="Ubah">
                             <i class="bi bi-pencil-square"></i>
                         </button>
 

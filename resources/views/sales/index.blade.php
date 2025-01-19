@@ -1,17 +1,28 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
+<div class="">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h1 class="mb-0">Daftar Transaksi Penjualan</h1>
-        <a href="{{ route('sales.create') }}" class="btn btn-primary btn-sm">Buat Transaksi Penjualan</a>
+        {{-- <a href="{{ route('sales.create') }}" class="btn btn-primary btn-sm">Buat Transaksi Penjualan</a> --}}
+        <button class="btn btn-primary btn-sm" id="open-create-form">
+            <i class="bi bi-plus-lg" style="font-size: 1rem;"></i> Tambah Transaksi
+        </button>
     </div>
 
     <!-- Filter, Sort, and Search Form -->
     <form id="filter-form" class="mb-4">
         <div class="row g-2 justify-content-end">
-            <div class="col-md-3 col-sm-12">
-                <input type="text" name="search" class="form-control form-control-sm" placeholder="Cari berdasarkan Nomor Transaksi atau Nama Pelanggan" id="search" value="{{ $search }}">
+            <div class="col-md-3 col-sm-12 position-relative">
+                <input
+                    type="text"
+                    name="search"
+                    class="form-control form-control-sm ps-5"
+                    placeholder="Cari berdasarkan Nomor Transaksi atau Nama Pelanggan"
+                    id="search"
+                    value="{{ $search }}"
+                />
+                <i class="fas fa-search position-absolute top-50 start-0 translate-middle-y ms-3"></i> <!-- Icon inside the input -->
             </div>
             <div class="col-md-2 col-sm-6">
                 <input type="date" name="from_date" class="form-control form-control-sm" value="{{ $fromDate }}">
@@ -45,6 +56,46 @@
     <!-- Table Container -->
     <div id="table-container">
         @include('sales.table')  <!-- Include the table partial view here -->
+    </div>
+
+    <!-- Modal for Create/Edit Customer Form -->
+    <div class="modal fade" id="customerModal" tabindex="-1" aria-labelledby="customerModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="customerModalLabel">Masukan NiK Pelanggan</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <form id="customer-form" action="{{ route('sales.create') }}" method="POST enctype="multipart/form-data">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="customer-nik" class="form-label">NIK Pelanggan</label>
+                            <input type="text" class="form-control" id="customer-nik" name="nik" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="type_id" class="form-label">Tipe Pelanggan</label>
+                            <select name="type_id" id="type_id" class="form-control" required>
+                                <option value="" selected>Pilih Type Pelanggan</option>
+                                @foreach($types as $type)
+                                    <option value="{{ $type->id }}">{{ $type->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                            <i class="bi bi-x-circle"></i> Batalkan
+                        </button>
+                        <button type="submit" class="btn btn-primary" id="save-customer">
+                            <i class="bi bi-save"></i> Buat Transaksi
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
 @endsection
@@ -103,6 +154,14 @@
                     $('#table-container').html(response);
                 }
             });
+        });
+
+        // Open the Create customer form
+        $('#open-create-form').on('click', function() {
+            $('#customerModalLabel').text('Masukan NIK dan Tipe Pelanggan');
+            $('#customer-form')[0].reset();
+            $('#customer-id').val('');
+            $('#customerModal').modal('show');
         });
     });
 </script>

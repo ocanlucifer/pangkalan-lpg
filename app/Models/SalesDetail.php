@@ -10,7 +10,7 @@ class SalesDetail extends Model
     use HasFactory;
 
     // Kolom yang dapat diisi secara mass-assignment
-    protected $fillable = ['sales_id', 'menu_item_id', 'quantity', 'price', 'subtotal', 'discount'];
+    protected $fillable = ['sales_id', 'item_id', 'quantity', 'price', 'subtotal', 'discount'];
 
     /**
      * Relasi ke model Sale (header)
@@ -35,8 +35,8 @@ class SalesDetail extends Model
     /**
      * Relasi ke MenuItem.
      */
-    public function menuItem()
+    public function item()
     {
-        return $this->belongsTo(MenuItem::class);
+        return $this->belongsTo(Item::class);
     }
 }

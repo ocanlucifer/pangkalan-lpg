@@ -13,10 +13,12 @@ return new class extends Migration
     {
         Schema::create('customers', function (Blueprint $table) {
             $table->id();
+            $table->string('nik')->unique(); //nomor identitas
             $table->string('name');
             $table->string('address');
             $table->string('contact');
             $table->boolean('active')->default(true);
+            $table->text('ktp_image')->nullable();
             $table->foreignId('user_id')->constrained()->onDelete('cascade'); // ID pengguna yang melakukan transaksi
             $table->timestamps();
         });

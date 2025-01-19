@@ -24,7 +24,7 @@ class UserSeeder extends Seeder
         ]);
 
         User::create([
-            'name' => 'Owner Cafe',
+            'name' => 'Pemilik',
             'username' => 'owner',
             'email' => 'owner@example.com',
             'password' => Hash::make('owner123'),
@@ -33,7 +33,7 @@ class UserSeeder extends Seeder
         ]);
 
         User::create([
-            'name' => 'Cashier Cafe',
+            'name' => 'Kasir',
             'username' => 'kasir',
             'email' => 'kasir@example.com',
             'password' => Hash::make('kasir123'),
@@ -42,29 +42,11 @@ class UserSeeder extends Seeder
         ]);
 
         User::create([
-            'name' => 'Chef Cafe',
-            'username' => 'chef',
-            'email' => 'chef@example.com',
-            'password' => Hash::make('chef123'),
+            'name' => 'Bag. Pencatatan',
+            'username' => 'user',
+            'email' => 'user@example.com',
+            'password' => Hash::make('user123'),
             'role' => 'user',
-            'is_active' => false, // Flag aktif
-        ]);
-
-        User::create([
-            'name' => 'Baristha Cafe',
-            'username' => 'barishta',
-            'email' => 'baristha@example.com',
-            'password' => Hash::make('baristha123'),
-            'role' => 'user',
-            'is_active' => false, // Flag aktif
-        ]);
-
-        User::create([
-            'name' => 'Pelayan Cafe',
-            'username' => 'pelayan',
-            'email' => 'pelayan@example.com',
-            'password' => Hash::make('pelayan123'),
-            'role' => 'pelayan',
             'is_active' => false, // Flag aktif
         ]);
     }

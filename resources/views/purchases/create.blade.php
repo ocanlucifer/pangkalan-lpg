@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container">
+<div class="">
     <div class="row justify-content-between">
         <div class="col-md-8">
             <h3 class="display-6">Buat Transaksi Pembelian</h3>
@@ -101,7 +101,7 @@
                 <select name="items[${itemIndex}][item_id]" class="form-control item-select" required>
                     <option value="">Pilih Barang</option>
                     @foreach($items as $item)
-                        <option value="{{ $item->id }}" data-price="{{ $item->price }}">{{ $item->name }}</option>
+                        <option value="{{ $item->id }}" data-price="{{ $item->buy_price }}">{{ $item->name }}</option>
                     @endforeach
                 </select>
             </td>

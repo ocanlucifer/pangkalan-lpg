@@ -19,6 +19,7 @@
                         @endif
                     </a>
                 </th>
+                <th class="col-2">Tipe Pelanggan</th>
                 <th class="col-2">Total Sebelum Diskon</th>
                 <th class="col-1">Total Diskon</th>
                 <th class="col-2">Total Setelah Diskon</th>
@@ -40,6 +41,7 @@
                     <td class="text-center">{{ $loop->iteration }}</td>
                     <td><a href="{{ route('sales.show', $sale->id) }}" class="">{{ $sale->transaction_number }}</a></td>
                     <td>{{ $sale->customer->name }}</td>
+                    <td>{{ $sale->type->name }}</td>
                     <td>Rp {{ number_format($sale->total_before_discount, 2) }}</td>
                     <td>Rp {{ number_format($sale->total_item_discount + $sale->discount, 2) }}</td>
                     <td>Rp {{ number_format($sale->total_after_discount, 2) }}</td>

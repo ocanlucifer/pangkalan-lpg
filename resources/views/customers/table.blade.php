@@ -3,25 +3,17 @@
         <tr>
             <th class="col-0">No.</th>
             <th class="col-3">
+                <a href="#" class="sortable nav-link" data-sort-by="nik" data-order="{{ $order === 'asc' ? 'desc' : 'asc' }}">
+                    NIK Pelanggan
+                    @if ($sortBy === 'nik')
+                        <i class="fas fa-sort-{{ $order === 'asc' ? 'down' : 'up' }}"></i>
+                    @endif
+                </a>
+            </th>
+            <th class="col-3">
                 <a href="#" class="sortable nav-link" data-sort-by="name" data-order="{{ $order === 'asc' ? 'desc' : 'asc' }}">
                     Nama Pelanggan
                     @if ($sortBy === 'name')
-                        <i class="fas fa-sort-{{ $order === 'asc' ? 'down' : 'up' }}"></i>
-                    @endif
-                </a>
-            </th>
-            <th class="col-2">
-                <a href="#" class="sortable nav-link" data-sort-by="contact" data-order="{{ $order === 'asc' ? 'desc' : 'asc' }}">
-                    Kontak
-                    @if ($sortBy === 'contact')
-                        <i class="fas fa-sort-{{ $order === 'asc' ? 'down' : 'up' }}"></i>
-                    @endif
-                </a>
-            </th>
-            <th class="col-4">
-                <a href="#" class="sortable nav-link" data-sort-by="address" data-order="{{ $order === 'asc' ? 'desc' : 'asc' }}">
-                    Alamat
-                    @if ($sortBy === 'address')
                         <i class="fas fa-sort-{{ $order === 'asc' ? 'down' : 'up' }}"></i>
                     @endif
                 </a>
@@ -42,9 +34,8 @@
         @forelse ($customers as $customer)
             <tr>
                 <td class="text-center">{{ $loop->iteration }}</td>
+                <td>{{ $customer->nik }}</td>
                 <td>{{ $customer->name }}</td>
-                <td>{{ $customer->contact }}</td>
-                <td>{{ $customer->address }}</td>
                 <td class="text-center">
                     <span class="badge bg-{{ $customer->active ? 'success' : 'danger' }}">
                         {{ $customer->active ? 'Active' : 'Inactive' }}
@@ -52,12 +43,17 @@
                 </td>
                 <td>{{ $customer->user->name }}</td>
                 <td class="text-center">
+                    <a href="{{ route('customers.show', $customer->id) }}" class="btn btn-sm btn-info" data-bs-toggle="tooltip" title="Lihat Detail Pelanggan">
+                        <i class="bi bi-eye"></i>
+                    </a>
                     <button class="btn btn-sm btn-warning edit-customer"
                         data-id="{{ $customer->id }}"
+                        data-nik="{{ $customer->nik }}"
                         data-name="{{ $customer->name }}"
                         data-contact="{{ $customer->contact }}"
                         data-address="{{ $customer->address }}"
                         data-active="{{ $customer->active }}"
+                        data-ktp_image="{{ $customer->ktp_image }}"
                         data-bs-toggle="tooltip" title="Ubah Pelanggan">
                         <i class="bi bi-pencil-square"></i>
                     </button>

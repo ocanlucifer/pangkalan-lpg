@@ -10,13 +10,13 @@
     </style>
 </head>
 <body>
-    <h1>Laporan Penjualan (Per Menu)</h1>
+    <h1>Laporan Penjualan (Per Item)</h1>
     <p><strong>Periode:</strong> {{ $fromDate->format('d M Y') }} - {{ $toDate->format('d M Y') }}</p>
     <table>
         <thead>
             <tr>
                 <th>No.</th>
-                <th>Menu</th>
+                <th>Item</th>
                 <th>Total Qty</th>
                 <th>Nilai Transaksi</th>
             </tr>
