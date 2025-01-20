@@ -28,17 +28,17 @@ class CustomerController extends Controller
             ->orderBy($sortBy, $order)
             ->paginate($perPage);
 
-        // if ($request->ajax()) {
-        //     return view('customers.table', compact('customers', 'search', 'sortBy', 'order', 'perPage'))->render();
-        // }
-
         if ($request->ajax()) {
-            if ($request->param == 1){
-                return view('customers.index', compact('customers', 'search', 'sortBy', 'order', 'perPage'))->render();
-            } else {
-                return view('customers.table', compact('customers', 'search', 'sortBy', 'order', 'perPage'))->render();
-            }
+            return view('customers.table', compact('customers', 'search', 'sortBy', 'order', 'perPage'))->render();
         }
+
+        // if ($request->ajax()) {
+        //     if ($request->param == 1){
+        //         return view('customers.index', compact('customers', 'search', 'sortBy', 'order', 'perPage'))->render();
+        //     } else {
+        //         return view('customers.table', compact('customers', 'search', 'sortBy', 'order', 'perPage'))->render();
+        //     }
+        // }
 
         return view('customers.index', compact('customers', 'search', 'sortBy', 'order', 'perPage'));
     }

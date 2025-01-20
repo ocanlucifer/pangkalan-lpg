@@ -10,7 +10,12 @@ class Type extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'discount', 'user_id',];
+    protected $fillable = [
+        'name',
+        'discount',
+        'limit_trx',
+        'user_id',
+    ];
 
     public function sales()
     {
