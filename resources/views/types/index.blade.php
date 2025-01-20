@@ -74,6 +74,10 @@
                             <label for="type-discount" class="form-label">Potongan Harga (%)</label>
                             <input type="text" class="form-control" id="type-discount" name="discount" required>
                         </div>
+                        <div class="mb-3">
+                            <label for="type-limit_trx" class="form-label">Limit</label>
+                            <input type="text" class="form-control" id="type-limit_trx" name="limit_trx" required>
+                        </div>
                     </form>
                 </div>
                 <div class="modal-footer">
@@ -158,10 +162,12 @@
             const typeId = $(this).data('id');
             const typeName = $(this).data('name');
             const typeDiscount = $(this).data('discount');
+            const typeLimitTrx = $(this).data('limit_trx');
             $('#typeModalLabel').text('Ubah Tipe');
             $('#type-id').val(typeId);
             $('#type-name').val(typeName);
             $('#type-discount').val(typeDiscount);
+            $('#type-limit_trx').val(typeLimitTrx);
             $('#typeModal').modal('show');
         });
 

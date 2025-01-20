@@ -55,6 +55,7 @@ class TypeController extends Controller
         Type::create([
             'name' => $request->name,
             'discount' => $request->discount,
+            'limit_trx' => $request->limit_trx,
             'user_id' => Auth::User()->id,
         ]);
         // return redirect()->route('types.index')->with('success', 'Type created successfully.');
@@ -72,6 +73,7 @@ class TypeController extends Controller
         $type->update([
             'name' => $request->name,
             'discount' => $request->discount,
+            'limit_trx' => $request->limit_trx,
             'user_id' => Auth::User()->id,
         ]);
         // return redirect()->route('types.index')->with('success', 'Type updated successfully.');

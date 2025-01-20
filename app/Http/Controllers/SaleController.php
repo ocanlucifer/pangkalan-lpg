@@ -164,8 +164,10 @@ class SaleController extends Controller
             $totalPrice = 0;
             $totalDiscount = 0;
 
-            $get_discount_cust = Type::select('discount')->where('id',  $validatedData['type_id'])->first();
+            $get_discount_cust = Type::where('id',  $validatedData['type_id'])->first();
             $discount_cust = $get_discount_cust->discount;
+            $limit_cust    = $get_discount_cust->limit_trx;
+            $typename      = $get_discount_cust->name;
 
             // Simpan header transaksi (sale)
             $sale = Sale::create([
@@ -185,43 +187,76 @@ class SaleController extends Controller
                 $quantity = $item['quantity'];
                 $discount = $item['discount'] ?? 0;
 
-                // Check if the requested quantity is greater than the available stock
-                if ($item['quantity'] > $itemDetails->stock) {
-                    // Simpan error dalam array untuk setiap item
-                    $errors[] = "Stok untuk barang: {$itemDetails->name} Tidak Cukup. Stok yang tersedia: {$itemDetails->stock}, Sedangkan yang anda minta: {$item['quantity']}.";
+                $SumSalesByItemCust = DB::table('sales')
+                                ->join('sales_details', 'sales.id', '=', 'sales_details.sales_id')
+                                ->select(
+                                    DB::raw('SUM(sales_details.quantity) AS total_qty'),
+                                    'sales.customer_id',
+                                    'sales.type_id',
+                                    'sales_details.item_id',
+                                    DB::raw('MONTH(sales.created_at) AS month')
+                                )
+                                ->where('sales.customer_id', $validatedData['customer_id']) // Filter berdasarkan customer_id
+                                ->where('sales.type_id', $validatedData['type_id']) // Filter berdasarkan type_id
+                                ->where('sales_details.item_id', $item['item_id'])
+                                ->whereRaw('MONTH(sales.created_at) = MONTH(NOW())') // Filter berdasarkan bulan saat ini
+                                ->groupBy('sales.customer_id', 'sales.type_id', 'sales_details.item_id', DB::raw('MONTH(sales.created_at)'))
+                                ->first();
+                // Gunakan optional() untuk mencegah error jika null
+                $totalQty = optional($SumSalesByItemCust)->total_qty ?? 0;
+
+                $qtyProcessed = $totalQty + $quantity;
+
+                if ($limit_cust > $totalQty){
+                    $sisa_limit = $limit_cust - $totalQty;
                 } else {
-                    // Hitung subtotal per item setelah diskon
-                    $subtotal = ($itemPrice * $quantity) - $discount;
-
-                    // Tambahkan subtotal dan diskon ke total
-                    $totalPrice += $subtotal;
-                    $totalDiscount += $discount;
-
-                    // Simpan detail transaksi
-                    $salesDetail = SalesDetail::create([
-                        'sales_id' => $sale->id,
-                        'item_id' => $item['item_id'],
-                        'quantity' => $quantity,
-                        'price' => $itemPrice,
-                        'subtotal' => $subtotal,
-                        'discount' => $discount,
-                    ]);
-
-                    // Simpan data ke stock_card
-                    $stock_card = StockCard::create([
-                        'item_id' => $item['item_id'],
-                        'transaction_number' => $sale->transaction_number, // Gunakan ID transaksi sebagai nomor transaksi
-                        'qty_begin' => $itemDetails->stock,
-                        'qty_in' => 0,
-                        'qty_out' => $item['quantity'],
-                        'qty_end' => $itemDetails->stock - $item['quantity'],
-                    ]);
-
-                    // Perbarui stok barang
-                    $itemDetails->update([
-                        'stock' => $stock_card->qty_end,
-                    ]);
+                    $sisa_limit = 0;
                 }
+
+                if ($qtyProcessed >= $limit_cust) {
+                    // Simpan error dalam array untuk setiap item
+                    $errors[] = "Limit {$typename} Tidak Cukup. Sisa Limit: {$sisa_limit} / {$limit_cust}.";
+                } else {
+                    // Check if the requested quantity is greater than the available stock
+                    if ($item['quantity'] > $itemDetails->stock) {
+                        // Simpan error dalam array untuk setiap item
+                        $errors[] = "Stok untuk barang: {$itemDetails->name} Tidak Cukup. Stok yang tersedia: {$itemDetails->stock}, Sedangkan yang anda minta: {$item['quantity']}.";
+                    } else {
+                        // Hitung subtotal per item setelah diskon
+                        $subtotal = ($itemPrice * $quantity) - $discount;
+
+                        // Tambahkan subtotal dan diskon ke total
+                        $totalPrice += $subtotal;
+                        $totalDiscount += $discount;
+
+                        // Simpan detail transaksi
+                        $salesDetail = SalesDetail::create([
+                            'sales_id' => $sale->id,
+                            'item_id' => $item['item_id'],
+                            'quantity' => $quantity,
+                            'price' => $itemPrice,
+                            'subtotal' => $subtotal,
+                            'discount' => $discount,
+                        ]);
+
+                        // Simpan data ke stock_card
+                        $stock_card = StockCard::create([
+                            'item_id' => $item['item_id'],
+                            'transaction_number' => $sale->transaction_number, // Gunakan ID transaksi sebagai nomor transaksi
+                            'qty_begin' => $itemDetails->stock,
+                            'qty_in' => 0,
+                            'qty_out' => $item['quantity'],
+                            'qty_end' => $itemDetails->stock - $item['quantity'],
+                        ]);
+
+                        // Perbarui stok barang
+                        $itemDetails->update([
+                            'stock' => $stock_card->qty_end,
+                        ]);
+                    }
+                }
+
+
             }
 
             if (!empty($errors)) {
@@ -275,7 +310,6 @@ class SaleController extends Controller
     // Fungsi untuk memperbarui transaksi
     public function update(Request $request, $id)
     {
-        // Validasi input dari form
         $validatedData = $request->validate([
             'customer_id' => 'required|exists:customers,id',
             'type_id' => 'required|exists:types,id',
@@ -314,18 +348,41 @@ class SaleController extends Controller
             $totalPrice = 0;
             $totalDiscount = 0;
 
-            $get_discount_cust = Type::select('discount')->where('id', $validatedData['type_id'])->first();
+            $get_discount_cust = Type::where('id', $validatedData['type_id'])->first();
             $discount_cust = $get_discount_cust->discount;
+            $limit_cust    = $get_discount_cust->limit_trx;
+            $typename      = $get_discount_cust->name;
 
-            // Loop untuk memproses detail baru
             foreach ($validatedData['items'] as $item) {
                 $itemDetails = Item::findOrFail($item['item_id']);
                 $itemPrice = $itemDetails->sell_price - ($itemDetails->sell_price * ($discount_cust / 100));
                 $quantity = $item['quantity'];
-                $discount = $item['discount'] ?? 0; // Diskon per item
+                $discount = $item['discount'] ?? 0;
 
-                // Periksa stok barang
-                if ($quantity > $itemDetails->stock) {
+                // Menghitung jumlah total item yang sudah diproses
+                $SumSalesByItemCust = DB::table('sales')
+                    ->join('sales_details', 'sales.id', '=', 'sales_details.sales_id')
+                    ->select(
+                        DB::raw('SUM(sales_details.quantity) AS total_qty'),
+                        'sales.customer_id',
+                        'sales.type_id',
+                        'sales_details.item_id',
+                        DB::raw('MONTH(sales.created_at) AS month')
+                    )
+                    ->where('sales.customer_id', $validatedData['customer_id'])
+                    ->where('sales.type_id', $validatedData['type_id'])
+                    ->where('sales_details.item_id', $item['item_id'])
+                    ->whereRaw('MONTH(sales.created_at) = MONTH(NOW())')
+                    ->groupBy('sales.customer_id', 'sales.type_id', 'sales_details.item_id', DB::raw('MONTH(sales.created_at)'))
+                    ->first();
+
+                $totalQty = optional($SumSalesByItemCust)->total_qty ?? 0;
+                $qtyProcessed = $totalQty + $quantity;
+
+                if ($qtyProcessed > $limit_cust) {
+                    $sisa_limit = $limit_cust - $totalQty;
+                    $errors[] = "Limit {$typename} Tidak Cukup. Sisa Limit: {$sisa_limit} / {$limit_cust}.";
+                } else if ($quantity > $itemDetails->stock) {
                     $errors[] = "Stok untuk barang: {$itemDetails->name} tidak cukup. Stok yang tersedia: {$itemDetails->stock}, sedangkan yang diminta: {$quantity}.";
                 } else {
                     // Hitung subtotal per item setelah diskon
@@ -363,7 +420,6 @@ class SaleController extends Controller
             }
 
             if (!empty($errors)) {
-                // Jika ada error, rollback transaksi dan kirim semua error
                 DB::rollBack();
                 return back()->with('error', implode('<br>', $errors));
             }
@@ -387,6 +443,122 @@ class SaleController extends Controller
             return back()->with('error', 'Gagal memperbarui transaksi penjualan: ' . $e->getMessage());
         }
     }
+
+    // public function update(Request $request, $id)
+    // {
+    //     // Validasi input dari form
+    //     $validatedData = $request->validate([
+    //         'customer_id' => 'required|exists:customers,id',
+    //         'type_id' => 'required|exists:types,id',
+    //         'items' => 'required|array',
+    //         'items.*.item_id' => 'required|exists:items,id',
+    //         'items.*.quantity' => 'required|integer|min:1',
+    //         'items.*.discount' => 'nullable|numeric|min:0',
+    //         'discount' => 'nullable|numeric|min:0', // Diskon header
+    //         'payment_amount' => 'required|numeric|min:0',//|gte:grand_total', // Payment must be greater than or equal to grand total
+    //         'change_amount' => 'required|numeric|min:0',//|lte:payment_amount', // Change must be less than or equal to payment amount
+    //     ]);
+
+    //     $errors = []; // Menyimpan semua error yang ditemukan
+
+    //     DB::beginTransaction();
+
+    //     try {
+    //         // Cari transaksi penjualan yang akan diperbarui
+    //         $sale = Sale::with('details')->findOrFail($id);
+
+    //         // Kembalikan stok barang dari detail transaksi lama
+    //         foreach ($sale->details as $detail) {
+    //             $item = Item::findOrFail($detail->item_id);
+    //             $item->update([
+    //                 'stock' => $item->stock + $detail->quantity, // Kembalikan stok
+    //             ]);
+    //         }
+
+    //         // Hapus detail transaksi lama
+    //         $sale->details()->delete();
+
+    //         // Hapus data di stock_card terkait transaksi ini
+    //         StockCard::where('transaction_number', $sale->id)->delete();
+
+    //         // Hitung total harga dan total diskon
+    //         $totalPrice = 0;
+    //         $totalDiscount = 0;
+
+    //         $get_discount_cust = Type::where('id', $validatedData['type_id'])->first();
+    //         $discount_cust = $get_discount_cust->discount;
+    //         $limit_cust    = $get_discount_cust->limit_trx;
+
+    //         // Loop untuk memproses detail baru
+    //         foreach ($validatedData['items'] as $item) {
+    //             $itemDetails = Item::findOrFail($item['item_id']);
+    //             $itemPrice = $itemDetails->sell_price - ($itemDetails->sell_price * ($discount_cust / 100));
+    //             $quantity = $item['quantity'];
+    //             $discount = $item['discount'] ?? 0; // Diskon per item
+
+    //             // Periksa stok barang
+    //             if ($quantity > $itemDetails->stock) {
+    //                 $errors[] = "Stok untuk barang: {$itemDetails->name} tidak cukup. Stok yang tersedia: {$itemDetails->stock}, sedangkan yang diminta: {$quantity}.";
+    //             } else {
+    //                 // Hitung subtotal per item setelah diskon
+    //                 $subtotal = ($itemPrice * $quantity) - $discount;
+
+    //                 // Tambahkan subtotal dan diskon ke total
+    //                 $totalPrice += $subtotal;
+    //                 $totalDiscount += $discount;
+
+    //                 // Simpan detail transaksi baru
+    //                 SalesDetail::create([
+    //                     'sales_id' => $sale->id,
+    //                     'item_id' => $item['item_id'],
+    //                     'quantity' => $quantity,
+    //                     'price' => $itemPrice,
+    //                     'subtotal' => $subtotal,
+    //                     'discount' => $discount,
+    //                 ]);
+
+    //                 // Simpan data ke stock_card
+    //                 StockCard::create([
+    //                     'item_id' => $item['item_id'],
+    //                     'transaction_number' => $sale->transaction_number,
+    //                     'qty_begin' => $itemDetails->stock,
+    //                     'qty_in' => 0,
+    //                     'qty_out' => $quantity,
+    //                     'qty_end' => $itemDetails->stock - $quantity,
+    //                 ]);
+
+    //                 // Perbarui stok barang
+    //                 $itemDetails->update([
+    //                     'stock' => $itemDetails->stock - $quantity,
+    //                 ]);
+    //             }
+    //         }
+
+    //         if (!empty($errors)) {
+    //             // Jika ada error, rollback transaksi dan kirim semua error
+    //             DB::rollBack();
+    //             return back()->with('error', implode('<br>', $errors));
+    //         }
+
+    //         // Perbarui header transaksi
+    //         $sale->update([
+    //             'customer_id' => $validatedData['customer_id'],
+    //             'total_price' => $totalPrice - ($validatedData['discount'] ?? 0), // Total setelah diskon header
+    //             'discount' => $validatedData['discount'] ?? 0, // Diskon header
+    //             'payment_amount' => $validatedData['payment_amount'],
+    //             'change_amount' => $validatedData['change_amount'],
+    //             'type_id' => $validatedData['type_id'],
+    //             'user_id' => Auth::user()->id,
+    //         ]);
+
+    //         DB::commit();
+
+    //         return redirect()->route('sales.show', $id)->with('success', 'Transaksi Penjualan berhasil diperbarui!');
+    //     } catch (\Exception $e) {
+    //         DB::rollBack();
+    //         return back()->with('error', 'Gagal memperbarui transaksi penjualan: ' . $e->getMessage());
+    //     }
+    // }
 
     /**
      * Tampilkan detail transaksi tertentu.
