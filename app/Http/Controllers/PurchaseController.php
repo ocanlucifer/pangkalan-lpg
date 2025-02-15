@@ -272,8 +272,10 @@ class PurchaseController extends Controller
         if ($group == 'vendor') {
             $purchases = PurchaseHeader::select('vendor_id',
                                                 DB::raw('SUM(purchase_headers.total_amount) as total_amount'),
+                                                DB::raw('SUM(purchase_details.quantity) as total_quantity') // Menjumlahkan quantity dari details
                                             )
-                ->with(['vendor', 'details.item'])
+                ->join('purchase_details', 'purchase_headers.id', '=', 'purchase_details.purchase_header_id')
+                ->with(['vendor','details', 'details.item'])
                 ->whereBetween('purchase_headers.created_at', [$fromDate, $toDate])
                 ->groupBy('purchase_headers.vendor_id')
                 ->paginate($perPage);
@@ -344,11 +346,13 @@ class PurchaseController extends Controller
 
         // Ambil data vendor berdasarkan rentang tanggal
         $PurchaseQuery = PurchaseHeader::select('vendor_id',
-                            DB::raw('SUM(purchase_headers.total_amount) as total_amount'),
-                        )
-                    ->with(['vendor', 'details.item'])
-                    ->whereBetween('purchase_headers.created_at', [$fromDate, $toDate])
-                    ->groupBy('purchase_headers.vendor_id');
+                                            DB::raw('SUM(purchase_headers.total_amount) as total_amount'),
+                                            DB::raw('SUM(purchase_details.quantity) as total_quantity') // Menjumlahkan quantity dari details
+                                        )
+                                    ->join('purchase_details', 'purchase_headers.id', '=', 'purchase_details.purchase_header_id')
+                                    ->with(['vendor','details', 'details.item'])
+                                    ->whereBetween('purchase_headers.created_at', [$fromDate, $toDate])
+                                    ->groupBy('purchase_headers.vendor_id');
 
         // Jika memilih per customer
         if ($group == 'vendor') {
