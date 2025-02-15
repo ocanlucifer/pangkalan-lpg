@@ -3,6 +3,7 @@
         <tr>
             <th>No.</th>
             <th>Supplier</th>
+            <th>Qty</th>
             <th>Nilai Transaksi</th>
         </tr>
     </thead>
@@ -11,6 +12,7 @@
         <tr>
             <td class="text-center">{{ $loop->iteration }}</td>
             <td>{{ $purchase->vendor->name }}</td>
+            <td>{{ $purchase->total_quantity }}</td>
             <td>Rp {{ number_format($purchase->total_amount, 2) }}</td>
         </tr>
         @endforeach

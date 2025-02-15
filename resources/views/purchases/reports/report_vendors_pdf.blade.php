@@ -7,6 +7,13 @@
         th, td { border: 1px solid #000; padding: 5px; text-align: left; }
         th { background-color: #f2f2f2; }
         h1 { text-align: center; margin-bottom: 20px; }
+        /* Tanda Tangan */
+        .signature {
+            position: absolute;
+            bottom: 50px; /* Posisi tanda tangan dari bawah */
+            right: 50px; /* Posisi tanda tangan dari sisi kanan */
+            max-width: 200px;
+        }
     </style>
 </head>
 <body>
@@ -17,6 +24,7 @@
             <tr>
                 <th>No.</th>
                 <th>Supplier</th>
+                <th>Qty</th>
                 <th>Total Amount</th>
             </tr>
         </thead>
@@ -25,10 +33,23 @@
             <tr>
                 <td>{{ $loop->iteration }}</td>
                 <td>{{ $vendor->vendor->name }}</td>
+                <td>{{ $vendor->total_quantity }}</td>
                 <td>Rp {{ number_format($vendor->total_amount, 2) }}</td>
             </tr>
             @endforeach
         </tbody>
     </table>
+
+    <!-- Tanda tangan  -->
+    <div class="signature">
+        {{-- <img src="{{ public_path('images/tanda_tangan_riki.png') }}" alt="Tanda Tangan Riki Rahdiwansyah"> --}}
+        <p style="text-align: left;">Mengetahui,</p>
+        <p style="text-align: left;">Pemilik Pangkalan 3Kg</p>
+        <br>
+        <br>
+        <br>
+        <br>
+        <p style="text-align: center;">Ampen Sihombing</p>
+    </div>
 </body>
 </html>

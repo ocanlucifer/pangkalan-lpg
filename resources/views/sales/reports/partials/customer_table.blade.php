@@ -3,6 +3,8 @@
         <tr>
             <th>No.</th>
             <th>Pelanggan</th>
+            <th>Jenis Pelanggan</th>
+            <th>Quantity</th>
             <th>Total Penjualan</th>
             <th>Total Diskon</th>
             <th>Total Nilai Transaksi</th>
@@ -13,6 +15,8 @@
         <tr>
             <td class="text-center">{{ $loop->iteration }}</td>
             <td>{{ $sale->name }}</td>
+            <td>{{ $sale->type_name }}</td>
+            <td>{{ $sale->qty }}</td>
             <td>Rp {{ number_format($sale->total_before_discount, 2) }}</td>
             <td>Rp {{ number_format($sale->total_discount, 2) }}</td>
             <td>Rp {{ number_format($sale->total_after_discount, 2) }}</td>

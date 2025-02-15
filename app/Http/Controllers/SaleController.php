@@ -627,30 +627,36 @@ class SaleController extends Controller
                         ->select(
                             'customers.id',
                             'customers.name',
+                            DB::raw('types.name as type_name'),
                             DB::raw('(
                                 SUM(sales.total_price) +
                                 (SUM(sales.discount) + COALESCE(SUM(X.discount), 0))
                             ) AS total_before_discount'),
                             DB::raw('(SUM(sales.discount) + COALESCE(SUM(X.discount), 0)) AS total_discount'),
-                            DB::raw('SUM(sales.total_price) AS total_after_discount')
+                            DB::raw('SUM(sales.total_price) AS total_after_discount'),
+                            DB::raw('COALESCE(SUM(DISTINCT X.qty), 0) AS qty')
                         )
                         ->join('sales', 'customers.id', '=', 'sales.customer_id')
+                        ->join('types', 'types.id', '=', 'sales.type_id')
                         ->leftJoinSub(
                             DB::table('customers')
                                 ->select(
                                     'customers.id',
-                                    DB::raw('SUM(sales_details.discount) AS discount')
+                                    'sales.type_id',
+                                    DB::raw('SUM(sales_details.discount) AS discount'),
+                                    DB::raw('SUM(sales_details.quantity) AS qty')
                                 )
                                 ->join('sales', 'customers.id', '=', 'sales.customer_id')
                                 ->join('sales_details', 'sales.id', '=', 'sales_details.sales_id')
-                                ->groupBy('customers.id'),
+                                ->groupBy('customers.id', 'sales.type_id'),
                             'X',
-                            'customers.id',
-                            '=',
-                            'X.id'
+                            function ($join) {
+                                $join->on('customers.id', '=', 'X.id')
+                                     ->on('sales.type_id', '=', 'X.type_id'); // Tambahkan kondisi ini
+                            }
                         )
                         ->whereBetween('sales.created_at', [$fromDate, $toDate])
-                        ->groupBy('customers.id', 'customers.name')
+                        ->groupBy('customers.id', 'customers.name', 'sales.type_id', 'types.name')
                         ->orderBy('customers.name', 'asc')
                         ->paginate($perPage);
 
@@ -751,34 +757,40 @@ class SaleController extends Controller
 
         // Ambil data sales berdasarkan rentang tanggal
         $salesQuery = DB::table('customers')
-                        ->select(
-                            'customers.id',
-                            'customers.name',
-                            DB::raw('(
-                                SUM(sales.total_price) +
-                                (SUM(sales.discount) + COALESCE(SUM(X.discount), 0))
-                            ) AS total_before_discount'),
-                            DB::raw('(SUM(sales.discount) + COALESCE(SUM(X.discount), 0)) AS total_discount'),
-                            DB::raw('SUM(sales.total_price) AS total_after_discount')
-                        )
-                        ->join('sales', 'customers.id', '=', 'sales.customer_id')
-                        ->leftJoinSub(
-                            DB::table('customers')
-                                ->select(
-                                    'customers.id',
-                                    DB::raw('SUM(sales_details.discount) AS discount')
-                                )
-                                ->join('sales', 'customers.id', '=', 'sales.customer_id')
-                                ->join('sales_details', 'sales.id', '=', 'sales_details.sales_id')
-                                ->groupBy('customers.id'),
-                            'X',
-                            'customers.id',
-                            '=',
-                            'X.id'
-                        )
-                        ->whereBetween('sales.created_at', [$fromDate, $toDate])
-                        ->groupBy('customers.id', 'customers.name')
-                        ->orderBy('customers.name', 'asc');
+                            ->select(
+                                'customers.id',
+                                'customers.name',
+                                DB::raw('types.name as type_name'),
+                                DB::raw('(
+                                    SUM(sales.total_price) +
+                                    (SUM(sales.discount) + COALESCE(SUM(X.discount), 0))
+                                ) AS total_before_discount'),
+                                DB::raw('(SUM(sales.discount) + COALESCE(SUM(X.discount), 0)) AS total_discount'),
+                                DB::raw('SUM(sales.total_price) AS total_after_discount'),
+                                DB::raw('COALESCE(SUM(DISTINCT X.qty), 0) AS qty')
+                            )
+                            ->join('sales', 'customers.id', '=', 'sales.customer_id')
+                            ->join('types', 'types.id', '=', 'sales.type_id')
+                            ->leftJoinSub(
+                                DB::table('customers')
+                                    ->select(
+                                        'customers.id',
+                                        'sales.type_id',
+                                        DB::raw('SUM(sales_details.discount) AS discount'),
+                                        DB::raw('SUM(sales_details.quantity) AS qty')
+                                    )
+                                    ->join('sales', 'customers.id', '=', 'sales.customer_id')
+                                    ->join('sales_details', 'sales.id', '=', 'sales_details.sales_id')
+                                    ->groupBy('customers.id', 'sales.type_id'),
+                                'X',
+                                function ($join) {
+                                    $join->on('customers.id', '=', 'X.id')
+                                        ->on('sales.type_id', '=', 'X.type_id'); // Tambahkan kondisi ini
+                                }
+                            )
+                            ->whereBetween('sales.created_at', [$fromDate, $toDate])
+                            ->groupBy('customers.id', 'customers.name', 'sales.type_id', 'types.name')
+                            ->orderBy('customers.name', 'asc');
 
         // Jika memilih per customer
         if ($group == 'customer') {
