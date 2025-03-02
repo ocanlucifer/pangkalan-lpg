@@ -93,23 +93,25 @@ class SaleController extends Controller
         }
 
 
+        $AvailableStock = Item::sum('stock');
+
         $types = Type::All();
 
         // If the request is an AJAX request, return the partial view with the table
         if ($request->ajax()) {
-            return view('sales.table', compact('result', 'search', 'perPage', 'sortBy', 'order', 'fromDate', 'toDate', 'types'));
+            return view('sales.table', compact('result', 'search', 'perPage', 'sortBy', 'order', 'fromDate', 'toDate', 'types', 'AvailableStock'));
         }
 
         // if ($request->ajax()) {
         //     if ($request->param == 1){
-        //         return view('sales.index', compact('result', 'search', 'perPage', 'sortBy', 'order', 'fromDate', 'toDate', 'types'))->render();
+        //         return view('sales.index', compact('result', 'search', 'perPage', 'sortBy', 'order', 'fromDate', 'toDate', 'types', 'AvailableStock'))->render();
         //     } else {
-        //         return view('sales.table', compact('result', 'search', 'perPage', 'sortBy', 'order', 'fromDate', 'toDate', 'types'))->render();
+        //         return view('sales.table', compact('result', 'search', 'perPage', 'sortBy', 'order', 'fromDate', 'toDate', 'types', 'AvailableStock'))->render();
         //     }
         // }
 
         // Otherwise, return the full index view
-        return view('sales.index', compact('result', 'search', 'perPage', 'sortBy', 'order', 'fromDate', 'toDate', 'types'));
+        return view('sales.index', compact('result', 'search', 'perPage', 'sortBy', 'order', 'fromDate', 'toDate', 'types', 'AvailableStock'));
     }
 
 
@@ -693,6 +695,59 @@ class SaleController extends Controller
             return view('sales.reports.report', compact('items', 'fromDate', 'toDate', 'group', 'perPage'));
         }
 
+        if ($group == 'customer_type') {
+            $sales = DB::table('types')
+                        ->select(
+                            DB::raw('types.name as type_name'),
+                            DB::raw('(
+                                SUM(sales.total_price) +
+                                (SUM(sales.discount) + COALESCE(SUM(X.discount), 0))
+                            ) AS total_before_discount'),
+                            DB::raw('(SUM(sales.discount) + COALESCE(SUM(X.discount), 0)) AS total_discount'),
+                            DB::raw('SUM(sales.total_price) AS total_after_discount'),
+                            DB::raw('COALESCE(SUM(DISTINCT X.qty), 0) AS qty')
+                        )
+                        ->join('sales', 'types.id', '=', 'sales.type_id')
+                        ->leftJoinSub(
+                            DB::table('types')
+                                ->select(
+                                    'sales.type_id',
+                                    DB::raw('SUM(sales_details.discount) AS discount'),
+                                    DB::raw('SUM(sales_details.quantity) AS qty')
+                                )
+                                ->join('sales', 'types.id', '=', 'sales.type_id')
+                                ->join('sales_details', 'sales.id', '=', 'sales_details.sales_id')
+                                ->groupBy('sales.type_id'),
+                            'X',
+                            function ($join) {
+                                $join->on('sales.type_id', '=', 'X.type_id'); // Tambahkan kondisi ini
+                            }
+                        )
+                        ->whereBetween('sales.created_at', [$fromDate, $toDate])
+                        ->groupBy('sales.type_id', 'types.name')
+                        ->orderBy('types.name', 'asc')
+                        ->paginate($perPage);
+
+            // Jika tombol export ditekan
+            if ($request->has('export') && $request->input('export') == 'excel') {
+                $sales = Sale::with(['customer', 'details.Item'])
+                    ->whereBetween('created_at', [$fromDate, $toDate])
+                    ->get();
+
+                // Lakukan ekspor ke Excel
+                return Excel::download(new SalesExport($sales), 'sales_report.xlsx');
+            }
+
+            if ($request->ajax()) {
+                return response()->json([
+                    'html' => view('sales.reports.partials.customertype_table', compact('sales', 'fromDate', 'toDate', 'group', 'perPage'))->render()
+                ]);
+            }
+
+            return view('sales.reports.report', compact('sales', 'fromDate', 'toDate', 'group', 'perPage'));
+
+        }
+
 
         // Jika tombol export ditekan
         if ($request->has('export') && $request->input('export') == 'excel') {
@@ -796,6 +851,43 @@ class SaleController extends Controller
         if ($group == 'customer') {
             $sales = $salesQuery->get(); // Ambil semua sales per customer
             $view = 'sales.reports.report_customers_pdf';
+            $data = compact('sales', 'fromDate', 'toDate');
+
+        }
+
+        if ($group == 'customer_type') {
+            $sales = DB::table('types')
+                        ->select(
+                            DB::raw('types.name as type_name'),
+                            DB::raw('(
+                                SUM(sales.total_price) +
+                                (SUM(sales.discount) + COALESCE(SUM(X.discount), 0))
+                            ) AS total_before_discount'),
+                            DB::raw('(SUM(sales.discount) + COALESCE(SUM(X.discount), 0)) AS total_discount'),
+                            DB::raw('SUM(sales.total_price) AS total_after_discount'),
+                            DB::raw('COALESCE(SUM(DISTINCT X.qty), 0) AS qty')
+                        )
+                        ->join('sales', 'types.id', '=', 'sales.type_id')
+                        ->leftJoinSub(
+                            DB::table('types')
+                                ->select(
+                                    'sales.type_id',
+                                    DB::raw('SUM(sales_details.discount) AS discount'),
+                                    DB::raw('SUM(sales_details.quantity) AS qty')
+                                )
+                                ->join('sales', 'types.id', '=', 'sales.type_id')
+                                ->join('sales_details', 'sales.id', '=', 'sales_details.sales_id')
+                                ->groupBy('sales.type_id'),
+                            'X',
+                            function ($join) {
+                                $join->on('sales.type_id', '=', 'X.type_id'); // Tambahkan kondisi ini
+                            }
+                        )
+                        ->whereBetween('sales.created_at', [$fromDate, $toDate])
+                        ->groupBy('sales.type_id', 'types.name')
+                        ->orderBy('types.name', 'asc')
+                        ->get(); // Ambil semua sales per type
+            $view = 'sales.reports.report_customertypes_pdf';
             $data = compact('sales', 'fromDate', 'toDate');
 
         }

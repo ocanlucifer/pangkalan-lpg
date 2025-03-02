@@ -24,8 +24,9 @@
             <tr>
                 <th>No.</th>
                 <th>Supplier</th>
-                <th>Qty</th>
-                <th>Total Amount</th>
+                <th>Jumlah LPG</th>
+                <th>Nilai Transaksi</th>
+                <th>Tanggal Pembelian</th>
             </tr>
         </thead>
         <tbody>
@@ -35,6 +36,7 @@
                 <td>{{ $vendor->vendor->name }}</td>
                 <td>{{ $vendor->total_quantity }}</td>
                 <td>Rp {{ number_format($vendor->total_amount, 2) }}</td>
+                <td>{{ $vendor->purchase_date->format('d-m-Y') }}</td>
             </tr>
             @endforeach
         </tbody>

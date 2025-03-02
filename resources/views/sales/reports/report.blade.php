@@ -27,6 +27,7 @@
                         <select name="group" class="form-select form-select-sm me-2" id="group" onchange="$('#filter-form').submit()">
                             <option value="item" {{ $group == 'item' ? 'selected' : '' }}>Per Item</option>
                             <option value="customer" {{ $group == 'customer' ? 'selected' : '' }}>Per Pelanggan</option>
+                            <option value="customer_type" {{ $group == 'customer_type' ? 'selected' : '' }}>Per Jenis Pelanggan</option>
                         </select>
 
                         <!-- Dropdown untuk memilih jumlah per halaman -->
@@ -45,6 +46,8 @@
     <div id="report-table-container">
         @if($group == 'item')
             @include('sales.reports.partials.item_table', ['items' => $items])
+        @elseif ($group == 'customer_type')
+            @include('sales.reports.partials.customertype_table', ['items' => $sales])
         @else
             @include('sales.reports.partials.customer_table', ['sales' => $sales])
         @endif

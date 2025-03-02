@@ -14,6 +14,9 @@
     <form id="filter-form" class="mb-4">
         <div class="row g-2 justify-content-end">
             <div class="col-md-3 col-sm-12 position-relative">
+                <label>Stock Tersedia: <strong>{{ $AvailableStock }}</strong></label>
+            </div>
+            <div class="col-md-3 col-sm-12 position-relative">
                 <input
                     type="text"
                     name="search"

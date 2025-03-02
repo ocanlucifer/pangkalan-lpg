@@ -17,26 +17,28 @@
     </style>
 </head>
 <body>
-    <h1>Laporan Pembelian (Per Barang)</h1>
+    <h1>Laporan Penjualan (Per Jenis Pelanggan)</h1>
     <p><strong>Periode:</strong> {{ $fromDate->format('d M Y') }} - {{ $toDate->format('d M Y') }}</p>
     <table>
         <thead>
             <tr>
                 <th>No.</th>
-                <th>Nama Barang</th>
-                <th>Jumlah LPG</th>
-                <th>Nilai Transaksi</th>
-                <th>Tanggal Pembelian</th>
+                <th>Jenis Pelanggan</th>
+                <th>Quantity</th>
+                <th>Total Penjualan</th>
+                <th>Total Diskon</th>
+                <th>Total Nilai Transaksi</th>
             </tr>
         </thead>
         <tbody>
-            @foreach($items as $item)
+            @foreach($sales as $sale)
             <tr>
                 <td>{{ $loop->iteration }}</td>
-                <td>{{ $item->name }}</td>
-                <td>{{ $item->total_quantity }}</td>
-                <td>Rp {{ number_format($item->total_price, 2) }}</td>
-                <td>{{ \Carbon\Carbon::parse($item->purchase_date)->format('d-m-Y') }}</td>
+                <td>{{ $sale->type_name }}</td>
+                <td>{{ $sale->qty }}</td>
+                <td>Rp {{ number_format($sale->total_before_discount, 2) }}</td>
+                <td>Rp {{ number_format($sale->total_discount, 2) }}</td>
+                <td>Rp {{ number_format($sale->total_after_discount, 2) }}</td>
             </tr>
             @endforeach
         </tbody>
