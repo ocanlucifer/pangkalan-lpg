@@ -24,10 +24,10 @@
             <tr>
                 <th>No.</th>
                 <th>Nama Barang</th>
-                <th>Qty Awal</th>
-                <th>Qty Masuk</th>
-                <th>Qty Keluar</th>
-                <th>Qty Akhir</th>
+                {{-- <th>Qty Awal</th> --}}
+                <th>Jumlah LPG Masuk</th>
+                <th>Jumlah LPG Keluar</th>
+                <th>Jumlah LPG Saat Ini</th>
             </tr>
         </thead>
         <tbody>
@@ -35,7 +35,7 @@
             <tr>
                 <td>{{ $loop->iteration }}</td>
                 <td>{{ $stockMutation->name }}</td>
-                <td>{{ number_format($stockMutation->qty_begin) }}</td>
+                {{-- <td>{{ number_format($stockMutation->qty_begin) }}</td> --}}
                 <td>{{ number_format($stockMutation->qty_in) }}</td>
                 <td>{{ number_format($stockMutation->qty_out) }}</td>
                 <td>{{ number_format($stockMutation->qty_end) }}</td>

@@ -3,8 +3,9 @@
         <tr>
             <th>No.</th>
             <th>Nama Barang</th>
-            <th>Total Qty</th>
+            <th>Jumlah LPG</th>
             <th>Nilai Transaksi</th>
+            <th>Tanggal Pembelian</th>
         </tr>
     </thead>
     <tbody>
@@ -14,6 +15,7 @@
             <td>{{ $item->name }}</td>
             <td>{{ $item->total_quantity }}</td>
             <td>Rp {{ number_format($item->total_price, 2) }}</td>
+            <td>{{ \Carbon\Carbon::parse($item->purchase_date)->format('d-m-Y') }}</td>
         </tr>
         @endforeach
     </tbody>

@@ -271,27 +271,29 @@ class PurchaseController extends Controller
         // Default: laporan per vendor
         if ($group == 'vendor') {
             $purchases = PurchaseHeader::select('vendor_id',
+                                                'purchase_date',
                                                 DB::raw('SUM(purchase_headers.total_amount) as total_amount'),
                                                 DB::raw('SUM(purchase_details.quantity) as total_quantity') // Menjumlahkan quantity dari details
                                             )
                 ->join('purchase_details', 'purchase_headers.id', '=', 'purchase_details.purchase_header_id')
                 ->with(['vendor','details', 'details.item'])
                 ->whereBetween('purchase_headers.created_at', [$fromDate, $toDate])
-                ->groupBy('purchase_headers.vendor_id')
+                ->groupBy('purchase_headers.vendor_id','purchase_headers.purchase_date')
                 ->paginate($perPage);
         }
 
         if ($group == 'item') {
             // Query untuk grup berdasarkan item
-            $items = Item::select('items.name')
+            $items = Item::select('items.name','purchase_headers.purchase_date')
                 ->join('purchase_details', 'items.id', '=', 'purchase_details.item_id')
                 ->join('purchase_headers', 'purchase_details.purchase_header_id', '=', 'purchase_headers.id')
                 ->whereBetween('purchase_headers.created_at', [$fromDate, $toDate])
                 ->selectRaw('SUM(purchase_details.quantity) as total_quantity')
                 ->selectRaw('SUM(purchase_details.total_price) as total_price')
-                ->groupBy('items.name')
+                ->groupBy('items.name','purchase_headers.purchase_date')
                 ->having('total_quantity', '>', 0) // Hanya ambil item dengan total quantity > 0
                 ->paginate($perPage);
+            // dd($items);
 
             // Jika tombol export ditekan
             if ($request->has('export') && $request->input('export') == 'excel') {
@@ -346,13 +348,14 @@ class PurchaseController extends Controller
 
         // Ambil data vendor berdasarkan rentang tanggal
         $PurchaseQuery = PurchaseHeader::select('vendor_id',
-                                            DB::raw('SUM(purchase_headers.total_amount) as total_amount'),
-                                            DB::raw('SUM(purchase_details.quantity) as total_quantity') // Menjumlahkan quantity dari details
+                                                'purchase_date',
+                                                DB::raw('SUM(purchase_headers.total_amount) as total_amount'),
+                                                DB::raw('SUM(purchase_details.quantity) as total_quantity') // Menjumlahkan quantity dari details
                                         )
                                     ->join('purchase_details', 'purchase_headers.id', '=', 'purchase_details.purchase_header_id')
                                     ->with(['vendor','details', 'details.item'])
                                     ->whereBetween('purchase_headers.created_at', [$fromDate, $toDate])
-                                    ->groupBy('purchase_headers.vendor_id');
+                                    ->groupBy('purchase_headers.vendor_id','purchase_headers.purchase_date');
 
         // Jika memilih per customer
         if ($group == 'vendor') {
@@ -371,24 +374,20 @@ class PurchaseController extends Controller
                 });
             }])
             ->get()
-            ->map(function($item) {
-                // Hitung total quantity dan total sales per item
-                $totalQuantity = $item->purchaseDetails->sum('quantity');
-                $total_price = $item->purchaseDetails->sum(function($detail) {
-                    return $detail->total_price;
-                });
+            ->flatMap(function ($item) {
+                return $item->purchaseDetails->groupBy(function ($detail) {
+                    return optional($detail->purchaseHeader)->purchase_date; // Grouping berdasarkan purchase_date
+                })->map(function ($details, $purchaseDate) use ($item) {
+                    $totalQuantity = $details->sum('quantity');
+                    $totalPrice = $details->sum('total_price');
 
-                // Hanya kembalikan item yang memiliki total quantity lebih dari 0
-                if ($totalQuantity > 0) {
-                    return (object)[
+                    return (object) [
                         'name' => $item->name,
+                        'purchase_date' => $purchaseDate,
                         'total_quantity' => $totalQuantity,
-                        'total_price' => $total_price
+                        'total_price' => $totalPrice,
                     ];
-                }
-
-                // Jika quantity tidak lebih dari 0, kembalikan null
-                return null;
+                });
             })
             ->filter() // Filter item yang bernilai null (yaitu item dengan quantity 0)
             ->values(); // Reindex array setelah filter
